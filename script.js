@@ -1,16 +1,16 @@
 // Player data storage
-// let players = [
-//     { name: "João", level: 15 },
-//     { name: "Maria", level: 12 },
-//     { name: "Pedro", level: 18 },
-//     { name: "Ana", level: 10 },
-//     { name: "Carlos", level: 14 },
-//     { name: "Juliana", level: 16 },
-//     { name: "Lucas", level: 11 },
-//     { name: "Fernanda", level: 13 },
-//     { name: "Rafael", level: 17 },
-//     { name: "Beatriz", level: 9 }
-// ];
+let players = [
+    { name: "João", level: 15 },
+    { name: "Maria", level: 12 },
+    { name: "Pedro", level: 18 },
+    { name: "Ana", level: 10 },
+    { name: "Carlos", level: 14 },
+    { name: "Juliana", level: 16 },
+    { name: "Lucas", level: 11 },
+    { name: "Fernanda", level: 13 },
+    { name: "Rafael", level: 17 },
+    { name: "Beatriz", level: 9 }
+];
 
 // DOM Elements
 const playerNameInput = document.getElementById('playerName');
