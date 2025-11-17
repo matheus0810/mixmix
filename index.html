@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio de Times - Counter Strike 5v5</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+        }
+        .team-card {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .player-item {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
+        }
+        .input-field {
+            border: 2px solid #4b5563;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #ff4b2b;
+            box-shadow: 0 0 0 3px rgba(255, 75, 43, 0.2);
+        }
+        .header {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+        .highlight {
+            animation: highlight 1s ease;
+        }
+        @keyframes highlight {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(255, 255, 0, 0.3); }
+            100% { background-color: transparent; }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 75, 43, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
+        }
+        .spin {
+            animation: spin 0.5s ease-in-out;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        .winner-glow {
+            animation: winnerGlow 1s ease-in-out;
+        }
+        @keyframes winnerGlow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            50% { box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.5); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+        .map-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .map-card:hover:not(.banned):not(.picked) {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+        }
+        .map-card.banned {
+            opacity: 0.3;
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
+        .map-card.picked {
+            border: 3px solid #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+        .map-card.active {
+            border: 3px solid #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            border-bottom-color: #ff4b2b;
+            background: rgba(255, 75, 43, 0.1);
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        select {
+            appearance: auto;
+            -webkit-appearance: menulist;
+            -moz-appearance: menulist;
+        }
+        select option {
+            direction: ltr;
+        }
+        #playerLevel {
+            size: 1;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="header rounded-xl mb-8 p-6 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Sorteio de Times</h1>
+            <p class="text-xl text-gray-300">Counter Strike 5v5</p>
+            <div class="mt-4 flex justify-center">
+                <div class="w-24 h-1 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full"></div>
+            </div>
+        </header>
+
+        <!-- Tabs Navigation -->
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl mb-8 shadow-2xl overflow-hidden">
+            <div class="grid grid-cols-3 gap-0">
+                <button class="tab-button active py-4 px-6 font-bold text-lg hover:bg-gray-700/30" data-tab="captains">
+                    🏆 Capitães
+                </button>
+                <button class="tab-button py-4 px-6 font-bold text-lg hover:bg-gray-700/30" data-tab="maps">
+                    🗺️ Mapas
+                </button>
+                <button class="tab-button py-4 px-6 font-bold text-lg hover:bg-gray-700/30" data-tab="teams">
+                    👥 Times
+                </button>
+            </div>
+        </div>
+
+        <!-- Captain Draw Section -->
+        <section id="captainsTab" class="tab-content active bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4 text-center">Sorteio de Capitães</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                    <label class="block text-lg font-medium mb-2">Capitão 1</label>
+                    <input type="text" id="captain1Name" placeholder="Nome do primeiro capitão..." 
+                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-lg font-medium mb-2">Capitão 2</label>
+                    <input type="text" id="captain2Name" placeholder="Nome do segundo capitão..." 
+                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                </div>
+                
+                <div class="flex items-end">
+                    <button id="drawCaptainBtn" class="btn-primary w-full py-3 px-4 rounded-lg font-bold text-lg">
+                        Sortear Quem Começa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Captain Result -->
+            <div id="captainResult" class="hidden mt-6">
+                <div class="bg-gradient-to-r from-yellow-900/70 to-yellow-700/50 p-6 rounded-xl border-2 border-yellow-500/50 text-center">
+                    <p class="text-lg mb-2">🏆 Começa escolhendo:</p>
+                    <p id="winnerName" class="text-3xl font-bold text-yellow-300"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Picks and Bans Section -->
+        <section id="mapsTab" class="tab-content bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4 text-center">Picks e Bans de Mapas</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-lg font-medium mb-2">Nome do Time 1</label>
+                    <input type="text" id="team1Name" placeholder="Time 1..." 
+                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-lg font-medium mb-2">Nome do Time 2</label>
+                    <input type="text" id="team2Name" placeholder="Time 2..." 
+                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                </div>
+            </div>
+
+            <div class="flex justify-center mb-6">
+                <button id="startPickBanBtn" class="btn-primary py-3 px-8 rounded-lg font-bold text-lg">
+                    Iniciar Picks e Bans
+                </button>
+            </div>
+
+            <!-- Pick/Ban Interface -->
+            <div id="pickBanInterface" class="hidden">
+                <!-- Current turn indicator -->
+                <div class="bg-gray-700/50 p-4 rounded-lg mb-6 text-center">
+                    <p class="text-sm text-gray-300 mb-1">Vez de:</p>
+                    <p id="currentTurn" class="text-2xl font-bold"></p>
+                    <p id="currentAction" class="text-lg text-yellow-300 mt-1"></p>
+                </div>
+
+                <!-- Maps Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Ancient">
+                        <div class="text-xl font-bold mb-2">🏛️</div>
+                        <div class="font-semibold">Ancient</div>
+                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                    </div>
+                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Dust2">
+                        <div class="text-xl font-bold mb-2">🏜️</div>
+                        <div class="font-semibold">Dust2</div>
+                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                    </div>
+                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Inferno">
+                        <div class="text-xl font-bold mb-2">🔥</div>
+                        <div class="font-semibold">Inferno</div>
+                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                    </div>
+                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Mirage">
+                        <div class="text-xl font-bold mb-2">🌴</div>
+                        <div class="font-semibold">Mirage</div>
+                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                    </div>
+                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Nuke">
+                        <div class="text-xl font-bold mb-2">☢️</div>
+                        <div class="font-semibold">Nuke</div>
+                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                    </div>
+                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Overpass">
+                        <div class="text-xl font-bold mb-2">🌉</div>
+                        <div class="font-semibold">Overpass</div>
+                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                    </div>
+                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Train">
+                        <div class="text-xl font-bold mb-2">🚂</div>
+                        <div class="font-semibold">Train</div>
+                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                    </div>
+                </div>
+
+                <!-- Action History -->
+                <div class="bg-gray-700/50 p-4 rounded-lg">
+                    <h3 class="text-lg font-bold mb-3">Histórico</h3>
+                    <div id="actionHistory" class="space-y-2 max-h-48 overflow-y-auto">
+                        <p class="text-gray-400 italic text-sm">Nenhuma ação ainda</p>
+                    </div>
+                </div>
+
+                <!-- Reset Button -->
+                <div class="flex justify-center mt-6">
+                    <button id="resetPickBanBtn" class="bg-gray-600 hover:bg-gray-500 py-2 px-6 rounded-lg font-bold transition-all">
+                        Resetar Picks e Bans
+                    </button>
+                </div>
+            </div>
+
+            <!-- Final Result -->
+            <div id="pickBanResult" class="hidden mt-6">
+                <h3 class="text-xl font-bold mb-4 text-center text-green-400">🎮 Mapa Escolhido</h3>
+                <div class="bg-gradient-to-r from-green-900/70 to-green-700/50 p-6 rounded-xl border-2 border-green-500/50 text-center">
+                    <p id="finalMap" class="text-4xl font-bold"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Input Section -->
+        <section id="teamsTab" class="tab-content bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4 text-center">Insira o nome do corno</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                    <label class="block text-lg font-medium mb-2">Nome do newba</label>
+                    <input type="text" id="playerName" placeholder="Digite o nome do jogador..." 
+                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-lg font-medium mb-2">Level Gamersclub</label>
+                    <select id="playerLevel" class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                        <option value="">Selecione o level...</option>
+                        <option value="21">21</option>
+                        <option value="20">20</option>
+                        <option value="19">19</option>
+                        <option value="18">18</option>
+                        <option value="17">17</option>
+                        <option value="16">16</option>
+                        <option value="15">15</option>
+                        <option value="14">14</option>
+                        <option value="13">13</option>
+                        <option value="12">12</option>
+                        <option value="11">11</option>
+                        <option value="10">10</option>
+                        <option value="9">9</option>
+                        <option value="8">8</option>
+                        <option value="7">7</option>
+                        <option value="6">6</option>
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-end">
+                    <button id="addPlayerBtn" class="btn-primary w-full py-3 px-4 rounded-lg font-bold text-lg">
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Nome dos Limitados (<span id="playersCount">0</span>)</h3>
+                <div id="playersList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 min-h-[80px]">
+                    <!-- Players will be added here dynamically -->
+                    <div class="text-gray-400 italic text-center py-4">Nenhum jogador adicionado ainda</div>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button id="drawTeamsBtn" class="btn-primary py-3 px-8 rounded-lg font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed pulse">
+                    Sortear Times (Reze para não cair com o gui3d)
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="tab-content hidden bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-center">Times Sorteados</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="team-card bg-gradient-to-br from-blue-900/70 to-blue-700/50 p-6 rounded-xl border border-blue-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-center text-blue-300">Time 1</h3>
+                    <ul id="blueTeam" class="space-y-2">
+                        <!-- Blue team players will go here -->
+                    </ul>
+                </div>
+                
+                <div class="team-card bg-gradient-to-br from-red-900/70 to-red-700/50 p-6 rounded-xl border border-red-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-center text-red-300">Time 2</h3>
+                    <ul id="redTeam" class="space-y-2">
+                        <!-- Red team players will go here -->
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <button id="redoDrawBtn" class="btn-primary py-2 px-6 rounded-lg font-bold">
+                    Refazer Sorteio
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Player data storage
+        let players = [];
+        
+        // DOM Elements
+        const playerNameInput = document.getElementById('playerName');
+        const playerLevelSelect = document.getElementById('playerLevel');
+        const addPlayerBtn = document.getElementById('addPlayerBtn');
+        const drawTeamsBtn = document.getElementById('drawTeamsBtn');
+        const redoDrawBtn = document.getElementById('redoDrawBtn');
+        const playersList = document.getElementById('playersList');
+        const playersCount = document.getElementById('playersCount');
+        const resultsSection = document.getElementById('resultsSection');
+        const blueTeam = document.getElementById('blueTeam');
+        const redTeam = document.getElementById('redTeam');
+        
+        // Captain Draw Elements
+        const captain1Input = document.getElementById('captain1Name');
+        const captain2Input = document.getElementById('captain2Name');
+        const drawCaptainBtn = document.getElementById('drawCaptainBtn');
+        const captainResult = document.getElementById('captainResult');
+        const winnerName = document.getElementById('winnerName');
+
+        // Pick/Ban Elements
+        const team1NameInput = document.getElementById('team1Name');
+        const team2NameInput = document.getElementById('team2Name');
+        const startPickBanBtn = document.getElementById('startPickBanBtn');
+        const pickBanInterface = document.getElementById('pickBanInterface');
+        const currentTurnEl = document.getElementById('currentTurn');
+        const currentActionEl = document.getElementById('currentAction');
+        const actionHistoryEl = document.getElementById('actionHistory');
+        const resetPickBanBtn = document.getElementById('resetPickBanBtn');
+        const pickBanResult = document.getElementById('pickBanResult');
+        const finalMapEl = document.getElementById('finalMap');
+        const mapCards = document.querySelectorAll('.map-card');
+
+        // Pick/Ban State
+        let pickBanState = {
+            team1: '',
+            team2: '',
+            currentTeam: 1,
+            phase: 0, // 0: ban, 1: ban, 2: ban, 3: ban, 4: ban, 5: ban, 6: remaining map is picked
+            bannedMaps: [],
+            pickedMap: null,
+            history: []
+        };
+
+        // Pick/Ban Functions
+        function startPickBan() {
+            const team1 = team1NameInput.value.trim();
+            const team2 = team2NameInput.value.trim();
+
+            if (!team1 || !team2) {
+                alert('Preencha os nomes dos dois times!');
+                return;
+            }
+
+            if (team1.toLowerCase() === team2.toLowerCase()) {
+                alert('Os times precisam ter nomes diferentes!');
+                return;
+            }
+
+            // Initialize state
+            pickBanState.team1 = team1;
+            pickBanState.team2 = team2;
+            pickBanState.currentTeam = 1;
+            pickBanState.phase = 0;
+            pickBanState.bannedMaps = [];
+            pickBanState.pickedMap = null;
+            pickBanState.history = [];
+
+            // Show interface
+            pickBanInterface.classList.remove('hidden');
+            pickBanResult.classList.add('hidden');
+            actionHistoryEl.innerHTML = '<p class="text-gray-400 italic text-sm">Nenhuma ação ainda</p>';
+            
+            // Reset all map cards
+            mapCards.forEach(card => {
+                card.classList.remove('banned', 'picked', 'active');
+                card.querySelector('.map-status').textContent = '';
+            });
+
+            updatePickBanUI();
+            pickBanInterface.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updatePickBanUI() {
+            const currentTeamName = pickBanState.currentTeam === 1 ? pickBanState.team1 : pickBanState.team2;
+            currentTurnEl.textContent = currentTeamName;
+            
+            if (pickBanState.phase < 6) {
+                currentActionEl.textContent = '🚫 BANIR um mapa';
+            }
+
+            // Highlight available maps
+            mapCards.forEach(card => {
+                if (!card.classList.contains('banned')) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+        }
+
+        function handleMapClick(event) {
+            const card = event.currentTarget;
+            const mapName = card.dataset.map;
+
+            // Check if map is already banned or picked
+            if (card.classList.contains('banned') || card.classList.contains('picked')) {
+                return;
+            }
+
+            // Check if pick/ban is active
+            if (pickBanInterface.classList.contains('hidden')) {
+                return;
+            }
+
+            // Ban the map
+            if (pickBanState.phase < 6) {
+                banMap(card, mapName);
+            }
+        }
+
+        function banMap(card, mapName) {
+            const currentTeamName = pickBanState.currentTeam === 1 ? pickBanState.team1 : pickBanState.team2;
+            
+            // Add to banned maps
+            pickBanState.bannedMaps.push(mapName);
+            card.classList.add('banned');
+            card.classList.remove('active');
+            card.querySelector('.map-status').textContent = '❌ BANIDO';
+
+            // Add to history
+            const historyItem = document.createElement('div');
+            historyItem.className = 'text-sm bg-red-900/30 p-2 rounded';
+            historyItem.innerHTML = `<strong>${currentTeamName}</strong> baniu <strong>${mapName}</strong>`;
+            
+            if (actionHistoryEl.querySelector('.text-gray-400')) {
+                actionHistoryEl.innerHTML = '';
+            }
+            actionHistoryEl.appendChild(historyItem);
+            pickBanState.history.push({ team: currentTeamName, action: 'ban', map: mapName });
+
+            // Move to next phase
+            pickBanState.phase++;
+
+            // Check if we reached the final map
+            if (pickBanState.phase === 6) {
+                // Find the remaining map
+                const remainingMap = Array.from(mapCards).find(card => !card.classList.contains('banned'));
+                if (remainingMap) {
+                    pickMap(remainingMap, remainingMap.dataset.map);
+                }
+                return;
+            }
+
+            // Alternate teams
+            pickBanState.currentTeam = pickBanState.currentTeam === 1 ? 2 : 1;
+            updatePickBanUI();
+        }
+
+        function pickMap(card, mapName) {
+            pickBanState.pickedMap = mapName;
+            card.classList.add('picked');
+            card.classList.remove('active');
+            card.querySelector('.map-status').textContent = '✅ ESCOLHIDO';
+
+            // Show final result
+            finalMapEl.textContent = mapName;
+            pickBanResult.classList.remove('hidden');
+            currentActionEl.textContent = '✅ Processo finalizado!';
+            
+            // Remove active state from all cards
+            mapCards.forEach(c => c.classList.remove('active'));
+
+            // Add to history
+            const historyItem = document.createElement('div');
+            historyItem.className = 'text-sm bg-green-900/30 p-2 rounded font-bold';
+            historyItem.innerHTML = `🎮 Mapa final: <strong>${mapName}</strong>`;
+            actionHistoryEl.appendChild(historyItem);
+
+            pickBanResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function resetPickBan() {
+            pickBanInterface.classList.add('hidden');
+            pickBanResult.classList.add('hidden');
+            
+            // Reset all map cards
+            mapCards.forEach(card => {
+                card.classList.remove('banned', 'picked', 'active');
+                card.querySelector('.map-status').textContent = '';
+            });
+
+            // Reset state
+            pickBanState = {
+                team1: '',
+                team2: '',
+                currentTeam: 1,
+                phase: 0,
+                bannedMaps: [],
+                pickedMap: null,
+                history: []
+            };
+        }
+
+        // Captain Draw Function
+        function drawCaptain() {
+            const captain1 = captain1Input.value.trim();
+            const captain2 = captain2Input.value.trim();
+
+            if (!captain1 || !captain2) {
+                alert('Preencha os nomes dos dois capitães!');
+                return;
+            }
+
+            if (captain1.toLowerCase() === captain2.toLowerCase()) {
+                alert('Os capitães precisam ter nomes diferentes!');
+                return;
+            }
+
+            // Add spin animation to button
+            drawCaptainBtn.classList.add('spin');
+
+            // Random selection after a short delay
+            setTimeout(() => {
+                const winner = Math.random() < 0.5 ? captain1 : captain2;
+                winnerName.textContent = winner;
+                captainResult.classList.remove('hidden');
+                captainResult.classList.add('winner-glow');
+                
+                // Remove spin animation
+                drawCaptainBtn.classList.remove('spin');
+                
+                // Scroll to result
+                captainResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                // Remove glow after animation
+                setTimeout(() => {
+                    captainResult.classList.remove('winner-glow');
+                }, 1000);
+            }, 500);
+        }
+
+        // Add player function
+        function addPlayer() {
+            const name = playerNameInput.value.trim();
+            const level = playerLevelSelect.value;
+
+            if (!name) {
+                alert('Bota um nome decente aí!');
+                return;
+            }
+
+            if (!level) {
+                alert('Seleciona o level primeiro, sem migué.');
+                return;
+            }
+
+            const alreadyExists = players.some(player => player.name.toLowerCase() === name.toLowerCase());
+            if (alreadyExists) {
+                alert('Esse ser humaninho já tá na lista.');
+                return;
+            }
+
+            players.push({ name, level: parseInt(level) });
+            updatePlayersList();
+            playerNameInput.value = '';
+            playerLevelSelect.selectedIndex = 0;
+            playerNameInput.focus();
+            
+            // Enable draw button if we have enough players
+            if (players.length >= 10) {
+                drawTeamsBtn.disabled = false;
+                drawTeamsBtn.classList.remove('pulse');
+            }
+        }
+        
+        // Update players list display
+        function updatePlayersList() {
+            playersCount.textContent = players.length;
+            
+            if (players.length === 0) {
+                playersList.innerHTML = '<div class="text-gray-400 italic text-center py-4">Nenhum jogador adicionado ainda</div>';
+                return;
+            }
+            
+            playersList.innerHTML = '';
+            players.forEach((player, index) => {
+                const playerElement = document.createElement('div');
+                playerElement.className = 'player-item bg-gray-700/50 p-3 rounded-lg flex justify-between items-center animate-fadeIn';
+                playerElement.innerHTML = `
+                    <span>${player.name} <span class="text-gray-300 text-sm">(${player.level})</span></span>
+                    <button onclick="removePlayer(${index})" class="text-red-400 hover:text-red-300">&times;</button>
+                `;
+                playersList.appendChild(playerElement);
+            });
+        }
+        
+        // Remove player function
+        function removePlayer(index) {
+            players.splice(index, 1);
+            updatePlayersList();
+            
+            // Disable draw button if we don't have enough players anymore
+            if (players.length < 10) {
+                drawTeamsBtn.disabled = true;
+                drawTeamsBtn.classList.add('pulse');
+            }
+        }
+        
+        // Shuffle array function (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        
+        // Balanceia times usando algoritmo otimizado para níveis Gamersclub (1-21)
+        // Com níveis de 1 a 21, a diferença entre jogadores pode ser muito grande
+        // Prioriza distribuição equilibrada considerando skill gaps
+        function balanceTeams(playerPool) {
+            // Agrupa jogadores por faixas de skill para melhor distribuição
+            const highSkill = playerPool.filter(p => p.level >= 15);  // 15-21: Elite
+            const midSkill = playerPool.filter(p => p.level >= 8 && p.level < 15);  // 8-14: Intermediário
+            const lowSkill = playerPool.filter(p => p.level < 8);  // 1-7: Iniciante
+            
+            let bestTeamA = null;
+            let bestTeamB = null;
+            let bestDifference = Infinity;
+            let bestVariance = Infinity; // Variância para verificar distribuição dentro do time
+            
+            // Tenta 200 combinações para encontrar o melhor equilíbrio
+            for (let attempt = 0; attempt < 200; attempt++) {
+                const shuffledPlayers = [...playerPool];
+                shuffleArray(shuffledPlayers);
+                
+                // Ordena do maior para o menor, mas com aleatoriedade nos empates
+                const sortedByLevel = shuffledPlayers.sort((a, b) => {
+                    if (a.level === b.level) return Math.random() - 0.5;
+                    return b.level - a.level;
+                });
+                
+                const teamA = { members: [], total: 0, skillLevels: [] };
+                const teamB = { members: [], total: 0, skillLevels: [] };
+                
+                // Algoritmo de distribuição snake draft invertido
+                // Distribui os melhores jogadores alternadamente, depois equilibra o resto
+                sortedByLevel.forEach((player, index) => {
+                    if (teamA.members.length === 5) {
+                        teamB.members.push(player);
+                        teamB.total += player.level;
+                        teamB.skillLevels.push(player.level);
+                    } else if (teamB.members.length === 5) {
+                        teamA.members.push(player);
+                        teamA.total += player.level;
+                        teamA.skillLevels.push(player.level);
+                    } else {
+                        // Calcula não só a diferença de total, mas também a distribuição interna
+                        const diffIfA = Math.abs((teamA.total + player.level) - teamB.total);
+                        const diffIfB = Math.abs(teamA.total - (teamB.total + player.level));
+                        
+                        // Considera também a variância de skill dentro de cada time
+                        // Times com skill muito variado tendem a ser menos equilibrados
+                        const futureVarianceA = calculateVariance([...teamA.skillLevels, player.level]);
+                        const futureVarianceB = calculateVariance([...teamB.skillLevels, player.level]);
+                        
+                        // Pontuação combinada: 70% diferença de total, 30% variância interna
+                        const scoreA = (diffIfA * 0.7) + (futureVarianceA * 0.3);
+                        const scoreB = (diffIfB * 0.7) + (futureVarianceB * 0.3);
+                        
+                        if (scoreA <= scoreB) {
+                            teamA.members.push(player);
+                            teamA.total += player.level;
+                            teamA.skillLevels.push(player.level);
+                        } else {
+                            teamB.members.push(player);
+                            teamB.total += player.level;
+                            teamB.skillLevels.push(player.level);
+                        }
+                    }
+                });
+                
+                // Avalia qualidade da distribuição
+                const difference = Math.abs(teamA.total - teamB.total);
+                const variance = Math.abs(calculateVariance(teamA.skillLevels) - calculateVariance(teamB.skillLevels));
+                const combinedScore = difference + (variance * 0.5);
+                
+                // Mantém a melhor combinação
+                if (combinedScore < (bestDifference + (bestVariance * 0.5))) {
+                    bestDifference = difference;
+                    bestVariance = variance;
+                    bestTeamA = teamA.members;
+                    bestTeamB = teamB.members;
+                    
+                    // Se encontrou equilíbrio quase perfeito (diferença <= 1), para
+                    if (difference <= 1 && variance < 5) break;
+                }
+            }
+            
+            return [bestTeamA, bestTeamB];
+        }
+        
+        // Calcula variância para medir dispersão de skill no time
+        function calculateVariance(levels) {
+            if (levels.length === 0) return 0;
+            const mean = levels.reduce((sum, level) => sum + level, 0) / levels.length;
+            const squaredDiffs = levels.map(level => Math.pow(level - mean, 2));
+            return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / levels.length;
+        }
+        
+        // Draw teams function with improved logic
+        function drawTeams() {
+            if (players.length < 10) {
+                alert("Você precisa adicionar pelo menos 10 jogadores para sortear os times!");
+                return;
+            }
+            
+            const [blueTeamPlayers, redTeamPlayers] = balanceTeams(players);
+            
+            // Display teams
+            displayTeams(blueTeamPlayers, redTeamPlayers);
+            
+            // Show results section
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Highlight the first team member
+            setTimeout(() => {
+                const firstPlayer = blueTeam.querySelector('li');
+                if (firstPlayer) {
+                    firstPlayer.classList.add('highlight');
+                }
+            }, 500);
+        }
+        
+        // Redo draw function - uses existing players
+        function redoDraw() {
+            if (players.length < 10) {
+                alert("Você precisa adicionar pelo menos 10 jogadores para sortear os times!");
+                return;
+            }
+            
+            const [blueTeamPlayers, redTeamPlayers] = balanceTeams(players);
+            
+            // Display teams
+            displayTeams(blueTeamPlayers, redTeamPlayers);
+            
+            // Highlight the first team member
+            setTimeout(() => {
+                const firstPlayer = blueTeam.querySelector('li');
+                if (firstPlayer) {
+                    firstPlayer.classList.add('highlight');
+                }
+            }, 500);
+        }
+        
+        // Display teams in UI
+        function displayTeams(bluePlayers, redPlayers) {
+            // Clear existing content
+            blueTeam.innerHTML = '';
+            redTeam.innerHTML = '';
+            
+            // Calculate totals
+            const blueTotal = bluePlayers.reduce((sum, p) => sum + p.level, 0);
+            const redTotal = redPlayers.reduce((sum, p) => sum + p.level, 0);
+            const blueAvg = (blueTotal / bluePlayers.length).toFixed(1);
+            const redAvg = (redTotal / redPlayers.length).toFixed(1);
+            
+            // Add players to blue team
+            bluePlayers.forEach(player => {
+                const li = document.createElement('li');
+                li.className = 'bg-blue-800/50 p-2 rounded flex justify-between items-center';
+                li.innerHTML = `<span>${player.name}</span><span class="font-bold text-blue-300">Lvl ${player.level}</span>`;
+                blueTeam.appendChild(li);
+            });
+            
+            // Add total for blue team
+            const blueTotalLi = document.createElement('li');
+            blueTotalLi.className = 'bg-blue-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-blue-400';
+            blueTotalLi.innerHTML = `Total: ${blueTotal} | Média: ${blueAvg}`;
+            blueTeam.appendChild(blueTotalLi);
+            
+            // Add players to red team
+            redPlayers.forEach(player => {
+                const li = document.createElement('li');
+                li.className = 'bg-red-800/50 p-2 rounded flex justify-between items-center';
+                li.innerHTML = `<span>${player.name}</span><span class="font-bold text-red-300">Lvl ${player.level}</span>`;
+                redTeam.appendChild(li);
+            });
+            
+            // Add total for red team
+            const redTotalLi = document.createElement('li');
+            redTotalLi.className = 'bg-red-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-red-400';
+            redTotalLi.innerHTML = `Total: ${redTotal} | Média: ${redAvg}`;
+            redTeam.appendChild(redTotalLi);
+        }
+        
+        // Reset everything
+        function reset() {
+            players = [];
+            updatePlayersList();
+            resultsSection.classList.add('hidden');
+            drawTeamsBtn.disabled = true;
+            drawTeamsBtn.classList.add('pulse');
+            playerNameInput.value = '';
+            playerLevelSelect.selectedIndex = 0;
+        }
+        
+        // Event Listeners
+        addPlayerBtn.addEventListener('click', addPlayer);
+        drawTeamsBtn.addEventListener('click', drawTeams);
+        redoDrawBtn.addEventListener('click', redoDraw);
+        drawCaptainBtn.addEventListener('click', drawCaptain);
+        startPickBanBtn.addEventListener('click', startPickBan);
+        resetPickBanBtn.addEventListener('click', resetPickBan);
+        
+        // Add click handlers to map cards
+        mapCards.forEach(card => {
+            card.addEventListener('click', handleMapClick);
+        });
+
+        // Tab Navigation
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.dataset.tab;
+                
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                // Show corresponding tab content
+                const activeTab = document.getElementById(tabName + 'Tab');
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                }
+                
+                // If results section should be shown (for teams tab)
+                if (tabName === 'teams' && !resultsSection.classList.contains('hidden')) {
+                    resultsSection.classList.add('active');
+                }
+            });
+        });
+        
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addPlayer();
+            }
+        });
+
+        playerLevelSelect.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addPlayer();
+            }
+        });
+        
+        captain1Input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                captain2Input.focus();
+            }
+        });
+        
+        captain2Input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                drawCaptain();
+            }
+        });
+        
+        // Initialize
+        updatePlayersList();
+        drawTeamsBtn.disabled = true;
+        drawTeamsBtn.classList.add('pulse');
+    </script>
+</body>
+</html>
