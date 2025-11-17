@@ -1,0 +1,153 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+    min-height: 100vh;
+}
+
+.team-card {
+    transition: all 0.3s ease;
+    transform: translateY(0);
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.player-item {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-primary {
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
+}
+
+.input-field {
+    border: 2px solid #4b5563;
+    transition: all 0.3s ease;
+}
+
+.input-field:focus {
+    border-color: #ff4b2b;
+    box-shadow: 0 0 0 3px rgba(255, 75, 43, 0.2);
+}
+
+.header {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+.highlight {
+    animation: highlight 1s ease;
+}
+
+@keyframes highlight {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(255, 255, 0, 0.3); }
+    100% { background-color: transparent; }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 75, 43, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
+}
+
+.spin {
+    animation: spin 0.5s ease-in-out;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+.winner-glow {
+    animation: winnerGlow 1s ease-in-out;
+}
+
+@keyframes winnerGlow {
+    0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+    50% { box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.5); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+.map-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.map-card:hover:not(.banned):not(.picked) {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+}
+
+.map-card.banned {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+.map-card.picked {
+    border: 3px solid #10b981;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+.map-card.active {
+    border: 3px solid #fbbf24;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+    animation: pulse 1.5s infinite;
+}
+
+.tab-button {
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-button.active {
+    border-bottom-color: #ff4b2b;
+    background: rgba(255, 75, 43, 0.1);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+select {
+    appearance: auto;
+    -webkit-appearance: menulist;
+    -moz-appearance: menulist;
+}
+
+select option {
+    direction: ltr;
+}
+
+#playerLevel {
+    size: 1;
+}
