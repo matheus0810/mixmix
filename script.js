@@ -321,33 +321,27 @@ function shuffleArray(array) {
 // Com níveis de 1 a 21, a diferença entre jogadores pode ser muito grande
 // Prioriza distribuição equilibrada considerando skill gaps
 function balanceTeams(playerPool) {
-    // Agrupa jogadores por faixas de skill para melhor distribuição
-    const highSkill = playerPool.filter(p => p.level >= 15);  // 15-21: Elite
-    const midSkill = playerPool.filter(p => p.level >= 8 && p.level < 15);  // 8-14: Intermediário
-    const lowSkill = playerPool.filter(p => p.level < 8);  // 1-7: Iniciante
-    
     let bestTeamA = null;
     let bestTeamB = null;
     let bestDifference = Infinity;
     let bestVariance = Infinity; // Variância para verificar distribuição dentro do time
     
-    // Tenta 200 combinações para encontrar o melhor equilíbrio
-    for (let attempt = 0; attempt < 200; attempt++) {
+    // Tenta 300 combinações para encontrar o melhor equilíbrio
+    for (let attempt = 0; attempt < 300; attempt++) {
         const shuffledPlayers = [...playerPool];
         shuffleArray(shuffledPlayers);
         
-        // Ordena do maior para o menor, mas com aleatoriedade nos empates
-        const sortedByLevel = shuffledPlayers.sort((a, b) => {
-            if (a.level === b.level) return Math.random() - 0.5;
-            return b.level - a.level;
-        });
+        // Ordena do maior para o menor level
+        const sortedByLevel = shuffledPlayers.sort((a, b) => b.level - a.level);
         
         const teamA = { members: [], total: 0, skillLevels: [] };
         const teamB = { members: [], total: 0, skillLevels: [] };
         
-        // Algoritmo de distribuição snake draft invertido
-        // Distribui os melhores jogadores alternadamente, depois equilibra o resto
-        sortedByLevel.forEach((player, index) => {
+        // Distribui jogadores de forma balanceada
+        for (let i = 0; i < sortedByLevel.length; i++) {
+            const player = sortedByLevel[i];
+            
+            // Se um time já está cheio, adiciona ao outro
             if (teamA.members.length === 5) {
                 teamB.members.push(player);
                 teamB.total += player.level;
@@ -357,12 +351,11 @@ function balanceTeams(playerPool) {
                 teamA.total += player.level;
                 teamA.skillLevels.push(player.level);
             } else {
-                // Calcula não só a diferença de total, mas também a distribuição interna
+                // Calcula onde é melhor colocar o jogador
                 const diffIfA = Math.abs((teamA.total + player.level) - teamB.total);
                 const diffIfB = Math.abs(teamA.total - (teamB.total + player.level));
                 
                 // Considera também a variância de skill dentro de cada time
-                // Times com skill muito variado tendem a ser menos equilibrados
                 const futureVarianceA = calculateVariance([...teamA.skillLevels, player.level]);
                 const futureVarianceB = calculateVariance([...teamB.skillLevels, player.level]);
                 
@@ -380,7 +373,12 @@ function balanceTeams(playerPool) {
                     teamB.skillLevels.push(player.level);
                 }
             }
-        });
+        }
+        
+        // Valida que ambos os times têm 5 jogadores
+        if (teamA.members.length !== 5 || teamB.members.length !== 5) {
+            continue; // Pula esta tentativa se não tiver 5 em cada time
+        }
         
         // Avalia qualidade da distribuição
         const difference = Math.abs(teamA.total - teamB.total);
