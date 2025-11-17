@@ -1,5 +1,16 @@
 // Player data storage
-let players = [];
+// let players = [
+//     { name: "João", level: 15 },
+//     { name: "Maria", level: 12 },
+//     { name: "Pedro", level: 18 },
+//     { name: "Ana", level: 10 },
+//     { name: "Carlos", level: 14 },
+//     { name: "Juliana", level: 16 },
+//     { name: "Lucas", level: 11 },
+//     { name: "Fernanda", level: 13 },
+//     { name: "Rafael", level: 17 },
+//     { name: "Beatriz", level: 9 }
+// ];
 
 // DOM Elements
 const playerNameInput = document.getElementById('playerName');
@@ -321,79 +332,60 @@ function shuffleArray(array) {
 // Com níveis de 1 a 21, a diferença entre jogadores pode ser muito grande
 // Prioriza distribuição equilibrada considerando skill gaps
 function balanceTeams(playerPool) {
-    let bestTeamA = null;
-    let bestTeamB = null;
-    let bestDifference = Infinity;
-    let bestVariance = Infinity; // Variância para verificar distribuição dentro do time
+    // Pega apenas os 10 primeiros jogadores
+    const playersToUse = playerPool.slice(0, 10);
     
-    // Tenta 300 combinações para encontrar o melhor equilíbrio
-    for (let attempt = 0; attempt < 300; attempt++) {
-        const shuffledPlayers = [...playerPool];
+    let bestTeamA = [];
+    let bestTeamB = [];
+    let bestDifference = Infinity;
+    
+    // Tenta 500 combinações para encontrar o melhor equilíbrio
+    for (let attempt = 0; attempt < 500; attempt++) {
+        const shuffledPlayers = [...playersToUse];
         shuffleArray(shuffledPlayers);
         
         // Ordena do maior para o menor level
-        const sortedByLevel = shuffledPlayers.sort((a, b) => b.level - a.level);
+        shuffledPlayers.sort((a, b) => b.level - a.level);
         
-        const teamA = { members: [], total: 0, skillLevels: [] };
-        const teamB = { members: [], total: 0, skillLevels: [] };
+        const teamA = [];
+        const teamB = [];
         
-        // Distribui jogadores de forma balanceada
-        for (let i = 0; i < sortedByLevel.length; i++) {
-            const player = sortedByLevel[i];
+        // Distribui jogadores alternadamente, sempre colocando no time com menor total
+        for (let i = 0; i < shuffledPlayers.length; i++) {
+            const player = shuffledPlayers[i];
             
-            // Se um time já está cheio, adiciona ao outro
-            if (teamA.members.length === 5) {
-                teamB.members.push(player);
-                teamB.total += player.level;
-                teamB.skillLevels.push(player.level);
-            } else if (teamB.members.length === 5) {
-                teamA.members.push(player);
-                teamA.total += player.level;
-                teamA.skillLevels.push(player.level);
+            // Se um time já tem 5, adiciona ao outro
+            if (teamA.length === 5) {
+                teamB.push(player);
+            } else if (teamB.length === 5) {
+                teamA.push(player);
             } else {
-                // Calcula onde é melhor colocar o jogador
-                const diffIfA = Math.abs((teamA.total + player.level) - teamB.total);
-                const diffIfB = Math.abs(teamA.total - (teamB.total + player.level));
+                // Calcula total atual de cada time
+                const totalA = teamA.reduce((sum, p) => sum + p.level, 0);
+                const totalB = teamB.reduce((sum, p) => sum + p.level, 0);
                 
-                // Considera também a variância de skill dentro de cada time
-                const futureVarianceA = calculateVariance([...teamA.skillLevels, player.level]);
-                const futureVarianceB = calculateVariance([...teamB.skillLevels, player.level]);
-                
-                // Pontuação combinada: 70% diferença de total, 30% variância interna
-                const scoreA = (diffIfA * 0.7) + (futureVarianceA * 0.3);
-                const scoreB = (diffIfB * 0.7) + (futureVarianceB * 0.3);
-                
-                if (scoreA <= scoreB) {
-                    teamA.members.push(player);
-                    teamA.total += player.level;
-                    teamA.skillLevels.push(player.level);
+                // Adiciona ao time com menor total
+                if (totalA <= totalB) {
+                    teamA.push(player);
                 } else {
-                    teamB.members.push(player);
-                    teamB.total += player.level;
-                    teamB.skillLevels.push(player.level);
+                    teamB.push(player);
                 }
             }
         }
         
-        // Valida que ambos os times têm 5 jogadores
-        if (teamA.members.length !== 5 || teamB.members.length !== 5) {
-            continue; // Pula esta tentativa se não tiver 5 em cada time
-        }
-        
-        // Avalia qualidade da distribuição
-        const difference = Math.abs(teamA.total - teamB.total);
-        const variance = Math.abs(calculateVariance(teamA.skillLevels) - calculateVariance(teamB.skillLevels));
-        const combinedScore = difference + (variance * 0.5);
+        // Calcula a diferença de level total
+        const totalA = teamA.reduce((sum, p) => sum + p.level, 0);
+        const totalB = teamB.reduce((sum, p) => sum + p.level, 0);
+        const difference = Math.abs(totalA - totalB);
         
         // Mantém a melhor combinação
-        if (combinedScore < (bestDifference + (bestVariance * 0.5))) {
+        if (difference < bestDifference) {
             bestDifference = difference;
-            bestVariance = variance;
-            bestTeamA = teamA.members;
-            bestTeamB = teamB.members;
+            bestTeamA = [...teamA];
+            bestTeamB = [...teamB];
             
-            // Se encontrou equilíbrio quase perfeito (diferença <= 1), para
-            if (difference <= 1 && variance < 5) break;
+            // Se encontrou equilíbrio perfeito (diferença 0 ou 1), para
+            if (difference <= 1) break;
         }
     }
     
@@ -415,7 +407,15 @@ function drawTeams() {
         return;
     }
     
+    console.log('Sorteando times com jogadores:', players);
     const [blueTeamPlayers, redTeamPlayers] = balanceTeams(players);
+    console.log('Times sorteados:', { blue: blueTeamPlayers, red: redTeamPlayers });
+    
+    // Verificação adicional
+    if (!blueTeamPlayers || !redTeamPlayers) {
+        alert('Erro ao balancear times. Tente novamente.');
+        return;
+    }
     
     // Display teams
     displayTeams(blueTeamPlayers, redTeamPlayers);
@@ -456,6 +456,13 @@ function redoDraw() {
 
 // Display teams in UI
 function displayTeams(bluePlayers, redPlayers) {
+    // Verificação de segurança
+    if (!bluePlayers || !redPlayers || bluePlayers.length === 0 || redPlayers.length === 0) {
+        console.error('Erro: Times vazios ou indefinidos', { bluePlayers, redPlayers });
+        alert('Erro ao sortear times. Tente novamente.');
+        return;
+    }
+    
     // Clear existing content
     blueTeam.innerHTML = '';
     redTeam.innerHTML = '';
@@ -573,5 +580,6 @@ captain2Input.addEventListener('keypress', (e) => {
 
 // Initialize
 updatePlayersList();
-drawTeamsBtn.disabled = true;
-drawTeamsBtn.classList.add('pulse');
+// Habilita o botão de sortear já que temos 10 jogadores de teste
+drawTeamsBtn.disabled = false;
+drawTeamsBtn.classList.remove('pulse');
