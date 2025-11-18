@@ -17,6 +17,14 @@
             <div class="mt-4 flex justify-center">
                 <div class="w-24 h-1 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full"></div>
             </div>
+            
+            <!-- Theme Selector -->
+            <div class="mt-4 flex justify-center gap-2">
+                <button onclick="changeTheme('default')" data-theme="default" class="theme-btn active-theme px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-red-500 to-yellow-500 hover:opacity-80 transition-all" title="Tema Padrão">🔥</button>
+                <button onclick="changeTheme('dark')" data-theme="dark" class="theme-btn px-3 py-1 rounded-lg text-sm font-semibold bg-gray-900 hover:opacity-80 transition-all" title="Tema Escuro">🌙</button>
+                <button onclick="changeTheme('furia')" data-theme="furia" class="theme-btn px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-black to-pink-600 hover:opacity-80 transition-all" title="Tema Furia">⚡</button>
+                <button onclick="changeTheme('mibr')" data-theme="mibr" class="theme-btn px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-500 to-green-600 hover:opacity-80 transition-all" title="Tema MIBR">🇧🇷</button>
+            </div>
         </header>
 
         <!-- Tabs Navigation -->
@@ -211,7 +219,12 @@
             </div>
 
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3">Nome dos Limitados (<span id="playersCount">0</span>)</h3>
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xl font-semibold">Nome dos Limitados (<span id="playersCount">0</span>)</h3>
+                    <button onclick="reset()" class="bg-red-600 hover:bg-red-700 py-1 px-4 rounded-lg font-bold text-sm transition-all" title="Limpar todos">
+                        🗑️ Limpar Todos
+                    </button>
+                </div>
                 <div id="playersList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 min-h-[80px]">
                     <!-- Players will be added here dynamically -->
                     <div class="text-gray-400 italic text-center py-4">Nenhum jogador adicionado ainda</div>
