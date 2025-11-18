@@ -210,7 +210,7 @@
                 </div>
                 
                 <div class="flex items-end">
-                    <button id="addPlayerBtn" class="btn-primary w-full py-3 px-4 rounded-lg font-bold text-lg">
+                    <button id="addPlayerBtn" class="btn-primary w-full py-3 px-4 rounded-lg font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         Adicionar
                     </button>
                 </div>
@@ -218,10 +218,24 @@
 
             <div class="mb-6">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-xl font-semibold">Nome dos Limitados (<span id="playersCount">0</span>)</h3>
-                    <button onclick="reset()" class="bg-red-600 hover:bg-red-700 py-1 px-4 rounded-lg font-bold text-sm transition-all" title="Limpar todos">
-                        🗑️ Limpar Todos
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-xl font-semibold">Nome dos Limitados (<span id="playersCount">0</span>)</h3>
+                        <!-- Progress Bar -->
+                        <div class="flex items-center gap-2">
+                            <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-gradient-to-r from-green-500 to-blue-500 transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <span id="progressText" class="text-sm text-gray-400">0/10</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="toggleSort()" class="bg-blue-600 hover:bg-blue-700 py-1 px-4 rounded-lg font-bold text-sm transition-all" title="Ordenar jogadores">
+                            🔄 Ordenar
+                        </button>
+                        <button onclick="reset()" class="bg-red-600 hover:bg-red-700 py-1 px-4 rounded-lg font-bold text-sm transition-all" title="Limpar todos">
+                            🗑️ Limpar Todos
+                        </button>
+                    </div>
                 </div>
                 <div id="playersList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 min-h-[80px]">
                     <!-- Players will be added here dynamically -->
