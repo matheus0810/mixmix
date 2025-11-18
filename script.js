@@ -21,7 +21,7 @@ function savePlayers() {
 }
 
 // Theme management
-let currentTheme = localStorage.getItem('csTheme') || 'default';
+let currentTheme = localStorage.getItem('csTheme') || 'furia';
 
 function applyTheme(theme) {
     document.body.className = `theme-${theme}`;
