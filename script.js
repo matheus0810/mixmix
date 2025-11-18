@@ -1,15 +1,18 @@
 // Player data storage
 let players = [
-  //  { name: "João", level: 15 },
- //   { name: "Maria", level: 12 },
- //   { name: "Pedro", level: 18 },
-  //  { name: "Ana", level: 10 },
- //  { name: "Carlos", level: 14 },
-//    { name: "Juliana", level: 16 },
- //   { name: "Lucas", level: 11 },
- //   { name: "Fernanda", level: 13 },
-//{ name: "Rafael", level: 17 },
- //   { name: "Beatriz", level: 9 }
+    { name: "Khaaz", level: 21 },
+    { name: "vsz", level: 8 },
+    { name: "Pedro", level: 9 },
+    { name: "Adreanu", level: 9 },
+    { name: "gui3d", level: 7 },
+    { name: "vitmoro", level: 11 },
+    { name: "Lucas", level: 10 },
+    { name: "matheus", level: 13 },
+    { name: "akira", level: 13 },
+    { name: "NTL", level: 17 },
+    { name: "heb", level: 18 },
+    { name: "iago", level: 12 },
+    { name: "baiano felix", level: 17 },
 ];
 
 // DOM Elements
@@ -583,4 +586,3 @@ updatePlayersList();
 // Habilita o botão de sortear já que temos 10 jogadores de teste
 drawTeamsBtn.disabled = false;
 drawTeamsBtn.classList.remove('pulse');
-
