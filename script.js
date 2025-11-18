@@ -1,5 +1,6 @@
 // Player data storage
-let players = [];
+let players = [
+];
 
 // Load players from localStorage on startup
 function loadPlayers() {
@@ -22,6 +23,7 @@ function savePlayers() {
 
 // Theme management
 let currentTheme = localStorage.getItem('csTheme') || 'furia';
+let sortOrder = 'added'; // 'added', 'level', 'name'
 
 function applyTheme(theme) {
     document.body.className = `theme-${theme}`;
@@ -36,6 +38,51 @@ function changeTheme(theme) {
         btn.classList.remove('active-theme');
     });
     document.querySelector(`[data-theme="${theme}"]`)?.classList.add('active-theme');
+}
+
+// Toggle sort order
+function toggleSort() {
+    if (sortOrder === 'added') {
+        sortOrder = 'level';
+    } else if (sortOrder === 'level') {
+        sortOrder = 'name';
+    } else {
+        sortOrder = 'added';
+    }
+    updatePlayersList();
+}
+
+// Get level badge
+function getLevelBadge(level) {
+    if (level >= 15) return '🥇';
+    if (level >= 8) return '🥈';
+    return '🥉';
+}
+
+// Get balance badge
+function getBalanceBadge(difference) {
+    if (difference === 0) return '<span class="px-3 py-1 bg-green-600 rounded-full text-sm font-bold">⚖️ Perfeitamente Balanceado</span>';
+    if (difference <= 2) return '<span class="px-3 py-1 bg-yellow-600 rounded-full text-sm font-bold">✓ Bem Balanceado</span>';
+    return '<span class="px-3 py-1 bg-red-600 rounded-full text-sm font-bold">⚠️ Desbalanceado</span>';
+}
+
+// Update progress bar
+function updateProgressBar() {
+    const count = players.length;
+    const percentage = Math.min((count / 10) * 100, 100);
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    if (progressBar && progressText) {
+        progressBar.style.width = `${percentage}%`;
+        progressText.textContent = `${count}/10`;
+        
+        if (count >= 10) {
+            progressBar.className = 'h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-300';
+        } else {
+            progressBar.className = 'h-full bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-300';
+        }
+    }
 }
 
 // DOM Elements
@@ -303,8 +350,10 @@ function addPlayer() {
     players.push({ name, level: parseInt(level) });
     savePlayers();
     updatePlayersList();
+    updateProgressBar();
     playerNameInput.value = '';
     playerLevelSelect.selectedIndex = 0;
+    addPlayerBtn.disabled = true;
     playerNameInput.focus();
     
     // Enable draw button if we have enough players
@@ -314,21 +363,39 @@ function addPlayer() {
     }
 }
 
+// Check if add button should be enabled
+function checkAddButton() {
+    const name = playerNameInput.value.trim();
+    const level = playerLevelSelect.value;
+    addPlayerBtn.disabled = !name || !level;
+}
+
 // Update players list display
 function updatePlayersList() {
     playersCount.textContent = players.length;
+    updateProgressBar();
     
     if (players.length === 0) {
         playersList.innerHTML = '<div class="text-gray-400 italic text-center py-4">Nenhum jogador adicionado ainda</div>';
         return;
     }
     
+    // Sort players based on current sort order
+    let sortedPlayers = [...players];
+    if (sortOrder === 'level') {
+        sortedPlayers.sort((a, b) => b.level - a.level);
+    } else if (sortOrder === 'name') {
+        sortedPlayers.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    
     playersList.innerHTML = '';
-    players.forEach((player, index) => {
+    sortedPlayers.forEach((player) => {
+        const index = players.indexOf(player);
+        const badge = getLevelBadge(player.level);
         const playerElement = document.createElement('div');
-        playerElement.className = 'player-item bg-gray-700/50 p-3 rounded-lg flex justify-between items-center animate-fadeIn';
+        playerElement.className = 'player-item bg-gray-700/50 p-3 rounded-lg flex justify-between items-center animate-fadeIn hover:bg-gray-600/50 transition-all hover:scale-105';
         playerElement.innerHTML = `
-            <span>${player.name} <span class="text-gray-300 text-sm">(Lvl ${player.level})</span></span>
+            <span>${badge} ${player.name} <span class="text-gray-300 text-sm font-bold">(Lvl ${player.level})</span></span>
             <div class="flex gap-2">
                 <button onclick="editPlayer(${index})" class="text-blue-400 hover:text-blue-300 font-bold px-2" title="Editar">✏️</button>
                 <button onclick="removePlayer(${index})" class="text-red-400 hover:text-red-300 font-bold px-2" title="Remover">&times;</button>
@@ -367,6 +434,7 @@ function removePlayer(index) {
     players.splice(index, 1);
     savePlayers();
     updatePlayersList();
+    updateProgressBar();
     
     // Disable draw button if we don't have enough players anymore
     if (players.length < 10) {
@@ -384,43 +452,60 @@ function shuffleArray(array) {
 }
 
 // Balanceia times usando algoritmo otimizado para níveis Gamersclub (1-21)
-// Com níveis de 1 a 21, a diferença entre jogadores pode ser muito grande
-// Prioriza distribuição equilibrada considerando skill gaps
+// Algoritmo melhorado que garante o melhor balanceamento possível
 function balanceTeams(playerPool) {
     // Pega apenas os 10 primeiros jogadores
     const playersToUse = playerPool.slice(0, 10);
     
+    // Ordena jogadores do maior para o menor level
+    const sortedPlayers = [...playersToUse].sort((a, b) => b.level - a.level);
+    
     let bestTeamA = [];
     let bestTeamB = [];
     let bestDifference = Infinity;
+    let bestVariance = Infinity;
     
-    // Tenta 500 combinações para encontrar o melhor equilíbrio
-    for (let attempt = 0; attempt < 500; attempt++) {
-        const shuffledPlayers = [...playersToUse];
-        shuffleArray(shuffledPlayers);
+    // Função para calcular variância interna do time (dispersão de skill)
+    function calculateTeamVariance(team) {
+        if (team.length === 0) return 0;
+        const mean = team.reduce((sum, p) => sum + p.level, 0) / team.length;
+        return team.reduce((sum, p) => sum + Math.pow(p.level - mean, 2), 0) / team.length;
+    }
+    
+    // Tenta 1000 combinações diferentes
+    for (let attempt = 0; attempt < 1000; attempt++) {
+        const shuffled = [...sortedPlayers];
         
-        // Ordena do maior para o menor level
-        shuffledPlayers.sort((a, b) => b.level - a.level);
+        // Embaralha mantendo alguma ordem (não totalmente aleatório)
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            if (Math.random() > 0.3) { // 70% de chance de trocar
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+        }
         
         const teamA = [];
         const teamB = [];
         
-        // Distribui jogadores alternadamente, sempre colocando no time com menor total
-        for (let i = 0; i < shuffledPlayers.length; i++) {
-            const player = shuffledPlayers[i];
-            
-            // Se um time já tem 5, adiciona ao outro
+        // Distribui jogadores usando algoritmo greedy melhorado
+        for (const player of shuffled) {
             if (teamA.length === 5) {
                 teamB.push(player);
             } else if (teamB.length === 5) {
                 teamA.push(player);
             } else {
-                // Calcula total atual de cada time
                 const totalA = teamA.reduce((sum, p) => sum + p.level, 0);
                 const totalB = teamB.reduce((sum, p) => sum + p.level, 0);
                 
-                // Adiciona ao time com menor total
-                if (totalA <= totalB) {
+                // Considera não só o total, mas também a distribuição
+                const varianceA = calculateTeamVariance([...teamA, player]);
+                const varianceB = calculateTeamVariance([...teamB, player]);
+                
+                // Calcula score combinado (80% diferença, 20% variância)
+                const scoreA = Math.abs(totalA + player.level - totalB) + (varianceA * 0.25);
+                const scoreB = Math.abs(totalA - (totalB + player.level)) + (varianceB * 0.25);
+                
+                if (scoreA <= scoreB) {
                     teamA.push(player);
                 } else {
                     teamB.push(player);
@@ -428,19 +513,21 @@ function balanceTeams(playerPool) {
             }
         }
         
-        // Calcula a diferença de level total
+        // Avalia a qualidade desta distribuição
         const totalA = teamA.reduce((sum, p) => sum + p.level, 0);
         const totalB = teamB.reduce((sum, p) => sum + p.level, 0);
         const difference = Math.abs(totalA - totalB);
+        const variance = Math.abs(calculateTeamVariance(teamA) - calculateTeamVariance(teamB));
         
-        // Mantém a melhor combinação
-        if (difference < bestDifference) {
+        // Mantém a melhor combinação (prioriza diferença menor)
+        if (difference < bestDifference || (difference === bestDifference && variance < bestVariance)) {
             bestDifference = difference;
+            bestVariance = variance;
             bestTeamA = [...teamA];
             bestTeamB = [...teamB];
             
-            // Se encontrou equilíbrio perfeito (diferença 0 ou 1), para
-            if (difference <= 1) break;
+            // Se encontrou equilíbrio perfeito, para
+            if (difference === 0) break;
         }
     }
     
@@ -504,6 +591,11 @@ function redoDraw() {
         return;
     }
     
+    // Confirmation dialog
+    if (!confirm('Tem certeza que deseja refazer o sorteio?')) {
+        return;
+    }
+    
     redoDrawBtn.disabled = true;
     redoDrawBtn.textContent = '🎲 Sorteando...';
     redoDrawBtn.classList.add('spin');
@@ -539,12 +631,18 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
     const blueAvg = (blueTotal / bluePlayers.length).toFixed(1);
     const redAvg = (redTotal / redPlayers.length).toFixed(1);
     
+    // Find best players for crown
+    const blueBest = bluePlayers.reduce((max, p) => p.level > max.level ? p : max, bluePlayers[0]);
+    const redBest = redPlayers.reduce((max, p) => p.level > max.level ? p : max, redPlayers[0]);
+    
     // Add players to blue team with animation
     bluePlayers.forEach((player, index) => {
         setTimeout(() => {
+            const isBest = player.name === blueBest.name;
+            const badge = getLevelBadge(player.level);
             const li = document.createElement('li');
-            li.className = 'bg-blue-800/50 p-2 rounded flex justify-between items-center animate-fadeIn';
-            li.innerHTML = `<span>${player.name}</span><span class="font-bold text-blue-300">Lvl ${player.level}</span>`;
+            li.className = 'bg-blue-800/50 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-blue-700/50 transition-all';
+            li.innerHTML = `<span>${isBest ? '👑 ' : ''}${badge} ${player.name}</span><span class="font-bold text-blue-300">Lvl ${player.level}</span>`;
             blueTeam.appendChild(li);
         }, index * 100);
     });
@@ -552,15 +650,19 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
     // Add players to red team with animation
     redPlayers.forEach((player, index) => {
         setTimeout(() => {
+            const isBest = player.name === redBest.name;
+            const badge = getLevelBadge(player.level);
             const li = document.createElement('li');
-            li.className = 'bg-red-800/50 p-2 rounded flex justify-between items-center animate-fadeIn';
-            li.innerHTML = `<span>${player.name}</span><span class="font-bold text-red-300">Lvl ${player.level}</span>`;
+            li.className = 'bg-red-800/50 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-red-700/50 transition-all';
+            li.innerHTML = `<span>${isBest ? '👑 ' : ''}${badge} ${player.name}</span><span class="font-bold text-red-300">Lvl ${player.level}</span>`;
             redTeam.appendChild(li);
         }, index * 100);
     });
     
     // Add totals after all players
     setTimeout(() => {
+        const difference = Math.abs(blueTotal - redTotal);
+        
         const blueTotalLi = document.createElement('li');
         blueTotalLi.className = 'bg-blue-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-blue-400 animate-fadeIn';
         blueTotalLi.innerHTML = `Total: ${blueTotal} | Média: ${blueAvg}`;
@@ -570,6 +672,19 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
         redTotalLi.className = 'bg-red-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-red-400 animate-fadeIn';
         redTotalLi.innerHTML = `Total: ${redTotal} | Média: ${redAvg}`;
         redTeam.appendChild(redTotalLi);
+        
+        // Add balance indicator
+        const balanceDiv = document.createElement('div');
+        balanceDiv.className = 'col-span-full text-center mt-4 animate-fadeIn';
+        balanceDiv.innerHTML = `
+            <div class="mb-2">${getBalanceBadge(difference)}</div>
+            <div class="text-sm text-gray-300">Diferença: ${difference} level${difference !== 1 ? 's' : ''}</div>
+        `;
+        
+        const resultsGrid = document.querySelector('#resultsSection .grid');
+        if (resultsGrid) {
+            resultsGrid.appendChild(balanceDiv);
+        }
         
         // Add export button after totals are shown
         addExportButton(bluePlayers, redPlayers, blueTotal, redTotal, blueAvg, redAvg);
@@ -682,14 +797,16 @@ tabButtons.forEach(button => {
     });
 });
 
+playerNameInput.addEventListener('input', checkAddButton);
 playerNameInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !addPlayerBtn.disabled) {
         addPlayer();
     }
 });
 
+playerLevelSelect.addEventListener('change', checkAddButton);
 playerLevelSelect.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !addPlayerBtn.disabled) {
         addPlayer();
     }
 });
@@ -710,6 +827,8 @@ captain2Input.addEventListener('keypress', (e) => {
 loadPlayers();
 applyTheme(currentTheme);
 updatePlayersList();
+updateProgressBar();
+checkAddButton();
 
 // Enable draw button if we have 10 or more players
 if (players.length >= 10) {
