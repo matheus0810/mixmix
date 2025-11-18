@@ -1,19 +1,42 @@
 // Player data storage
-let players = [
-    { name: "Khaaz", level: 21 },
-    { name: "vsz", level: 8 },
-    { name: "Pedro", level: 9 },
-    { name: "Adreanu", level: 9 },
-    { name: "gui3d", level: 7 },
-    { name: "vitmoro", level: 11 },
-    { name: "Lucas", level: 10 },
-    { name: "matheus", level: 13 },
-    { name: "akira", level: 13 },
-    { name: "NTL", level: 17 },
-    { name: "heb", level: 18 },
-    { name: "iago", level: 12 },
-    { name: "baiano felix", level: 17 },
-];
+let players = [];
+
+// Load players from localStorage on startup
+function loadPlayers() {
+    const saved = localStorage.getItem('csPlayers');
+    if (saved) {
+        try {
+            players = JSON.parse(saved);
+            console.log('Jogadores carregados do localStorage:', players);
+        } catch (e) {
+            console.error('Erro ao carregar jogadores:', e);
+            players = [];
+        }
+    }
+}
+
+// Save players to localStorage
+function savePlayers() {
+    localStorage.setItem('csPlayers', JSON.stringify(players));
+}
+
+// Theme management
+let currentTheme = localStorage.getItem('csTheme') || 'default';
+
+function applyTheme(theme) {
+    document.body.className = `theme-${theme}`;
+    currentTheme = theme;
+    localStorage.setItem('csTheme', theme);
+}
+
+// Change theme
+function changeTheme(theme) {
+    applyTheme(theme);
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.remove('active-theme');
+    });
+    document.querySelector(`[data-theme="${theme}"]`)?.classList.add('active-theme');
+}
 
 // DOM Elements
 const playerNameInput = document.getElementById('playerName');
@@ -278,6 +301,7 @@ function addPlayer() {
     }
 
     players.push({ name, level: parseInt(level) });
+    savePlayers();
     updatePlayersList();
     playerNameInput.value = '';
     playerLevelSelect.selectedIndex = 0;
@@ -324,6 +348,7 @@ function editPlayer(index) {
     
     // Remove o jogador da lista temporariamente
     players.splice(index, 1);
+    savePlayers();
     updatePlayersList();
     
     // Foca no campo de nome
@@ -340,6 +365,7 @@ function editPlayer(index) {
 // Remove player function
 function removePlayer(index) {
     players.splice(index, 1);
+    savePlayers();
     updatePlayersList();
     
     // Disable draw button if we don't have enough players anymore
@@ -437,29 +463,38 @@ function drawTeams() {
     }
     
     console.log('Sorteando times com jogadores:', players);
-    const [blueTeamPlayers, redTeamPlayers] = balanceTeams(players);
-    console.log('Times sorteados:', { blue: blueTeamPlayers, red: redTeamPlayers });
     
-    // Verificação adicional
-    if (!blueTeamPlayers || !redTeamPlayers) {
-        alert('Erro ao balancear times. Tente novamente.');
-        return;
-    }
+    // Show loading animation
+    drawTeamsBtn.disabled = true;
+    drawTeamsBtn.textContent = '🎲 Sorteando...';
+    drawTeamsBtn.classList.add('spin');
     
-    // Display teams
-    displayTeams(blueTeamPlayers, redTeamPlayers);
-    
-    // Show results section
-    resultsSection.classList.remove('hidden');
-    resultsSection.scrollIntoView({ behavior: 'smooth' });
-    
-    // Highlight the first team member
+    // Animate the draw
     setTimeout(() => {
-        const firstPlayer = blueTeam.querySelector('li');
-        if (firstPlayer) {
-            firstPlayer.classList.add('highlight');
+        const [blueTeamPlayers, redTeamPlayers] = balanceTeams(players);
+        console.log('Times sorteados:', { blue: blueTeamPlayers, red: redTeamPlayers });
+        
+        // Verificação adicional
+        if (!blueTeamPlayers || !redTeamPlayers) {
+            alert('Erro ao balancear times. Tente novamente.');
+            drawTeamsBtn.disabled = false;
+            drawTeamsBtn.textContent = 'Sortear Times (Reze para não cair com o gui3d)';
+            drawTeamsBtn.classList.remove('spin');
+            return;
         }
-    }, 500);
+        
+        // Display teams with animation
+        displayTeamsAnimated(blueTeamPlayers, redTeamPlayers);
+        
+        // Show results section
+        resultsSection.classList.remove('hidden');
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+        
+        // Reset button
+        drawTeamsBtn.disabled = false;
+        drawTeamsBtn.textContent = 'Sortear Times (Reze para não cair com o gui3d)';
+        drawTeamsBtn.classList.remove('spin');
+    }, 1000);
 }
 
 // Redo draw function - uses existing players
@@ -469,22 +504,24 @@ function redoDraw() {
         return;
     }
     
-    const [blueTeamPlayers, redTeamPlayers] = balanceTeams(players);
+    redoDrawBtn.disabled = true;
+    redoDrawBtn.textContent = '🎲 Sorteando...';
+    redoDrawBtn.classList.add('spin');
     
-    // Display teams
-    displayTeams(blueTeamPlayers, redTeamPlayers);
-    
-    // Highlight the first team member
     setTimeout(() => {
-        const firstPlayer = blueTeam.querySelector('li');
-        if (firstPlayer) {
-            firstPlayer.classList.add('highlight');
-        }
-    }, 500);
+        const [blueTeamPlayers, redTeamPlayers] = balanceTeams(players);
+        
+        // Display teams with animation
+        displayTeamsAnimated(blueTeamPlayers, redTeamPlayers);
+        
+        redoDrawBtn.disabled = false;
+        redoDrawBtn.textContent = 'Refazer Sorteio';
+        redoDrawBtn.classList.remove('spin');
+    }, 1000);
 }
 
-// Display teams in UI
-function displayTeams(bluePlayers, redPlayers) {
+// Display teams in UI with animation
+function displayTeamsAnimated(bluePlayers, redPlayers) {
     // Verificação de segurança
     if (!bluePlayers || !redPlayers || bluePlayers.length === 0 || redPlayers.length === 0) {
         console.error('Erro: Times vazios ou indefinidos', { bluePlayers, redPlayers });
@@ -502,44 +539,106 @@ function displayTeams(bluePlayers, redPlayers) {
     const blueAvg = (blueTotal / bluePlayers.length).toFixed(1);
     const redAvg = (redTotal / redPlayers.length).toFixed(1);
     
-    // Add players to blue team
-    bluePlayers.forEach(player => {
-        const li = document.createElement('li');
-        li.className = 'bg-blue-800/50 p-2 rounded flex justify-between items-center';
-        li.innerHTML = `<span>${player.name}</span><span class="font-bold text-blue-300">Lvl ${player.level}</span>`;
-        blueTeam.appendChild(li);
+    // Add players to blue team with animation
+    bluePlayers.forEach((player, index) => {
+        setTimeout(() => {
+            const li = document.createElement('li');
+            li.className = 'bg-blue-800/50 p-2 rounded flex justify-between items-center animate-fadeIn';
+            li.innerHTML = `<span>${player.name}</span><span class="font-bold text-blue-300">Lvl ${player.level}</span>`;
+            blueTeam.appendChild(li);
+        }, index * 100);
     });
     
-    // Add total for blue team
-    const blueTotalLi = document.createElement('li');
-    blueTotalLi.className = 'bg-blue-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-blue-400';
-    blueTotalLi.innerHTML = `Total: ${blueTotal} | Média: ${blueAvg}`;
-    blueTeam.appendChild(blueTotalLi);
-    
-    // Add players to red team
-    redPlayers.forEach(player => {
-        const li = document.createElement('li');
-        li.className = 'bg-red-800/50 p-2 rounded flex justify-between items-center';
-        li.innerHTML = `<span>${player.name}</span><span class="font-bold text-red-300">Lvl ${player.level}</span>`;
-        redTeam.appendChild(li);
+    // Add players to red team with animation
+    redPlayers.forEach((player, index) => {
+        setTimeout(() => {
+            const li = document.createElement('li');
+            li.className = 'bg-red-800/50 p-2 rounded flex justify-between items-center animate-fadeIn';
+            li.innerHTML = `<span>${player.name}</span><span class="font-bold text-red-300">Lvl ${player.level}</span>`;
+            redTeam.appendChild(li);
+        }, index * 100);
     });
     
-    // Add total for red team
-    const redTotalLi = document.createElement('li');
-    redTotalLi.className = 'bg-red-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-red-400';
-    redTotalLi.innerHTML = `Total: ${redTotal} | Média: ${redAvg}`;
-    redTeam.appendChild(redTotalLi);
+    // Add totals after all players
+    setTimeout(() => {
+        const blueTotalLi = document.createElement('li');
+        blueTotalLi.className = 'bg-blue-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-blue-400 animate-fadeIn';
+        blueTotalLi.innerHTML = `Total: ${blueTotal} | Média: ${blueAvg}`;
+        blueTeam.appendChild(blueTotalLi);
+        
+        const redTotalLi = document.createElement('li');
+        redTotalLi.className = 'bg-red-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-red-400 animate-fadeIn';
+        redTotalLi.innerHTML = `Total: ${redTotal} | Média: ${redAvg}`;
+        redTeam.appendChild(redTotalLi);
+        
+        // Add export button after totals are shown
+        addExportButton(bluePlayers, redPlayers, blueTotal, redTotal, blueAvg, redAvg);
+    }, 600);
+}
+
+// Add export button
+function addExportButton(bluePlayers, redPlayers, blueTotal, redTotal, blueAvg, redAvg) {
+    // Check if button already exists
+    let exportBtn = document.getElementById('exportResultBtn');
+    if (!exportBtn) {
+        exportBtn = document.createElement('button');
+        exportBtn.id = 'exportResultBtn';
+        exportBtn.className = 'btn-primary py-2 px-6 rounded-lg font-bold mr-4';
+        exportBtn.textContent = '📋 Copiar Resultado';
+        exportBtn.onclick = () => exportResult(bluePlayers, redPlayers, blueTotal, redTotal, blueAvg, redAvg);
+        
+        const buttonContainer = document.querySelector('#resultsSection .mt-8.text-center');
+        if (buttonContainer) {
+            buttonContainer.insertBefore(exportBtn, buttonContainer.firstChild);
+        }
+    } else {
+        // Update onclick handler with new data
+        exportBtn.onclick = () => exportResult(bluePlayers, redPlayers, blueTotal, redTotal, blueAvg, redAvg);
+    }
+}
+
+// Export result to clipboard
+function exportResult(bluePlayers, redPlayers, blueTotal, redTotal, blueAvg, redAvg) {
+    const text = `🎮 SORTEIO DE TIMES - CS 5v5\n\n` +
+        `🔵 TIME 1 (Total: ${blueTotal} | Média: ${blueAvg})\n` +
+        bluePlayers.map(p => `   • ${p.name} - Lvl ${p.level}`).join('\n') +
+        `\n\n🔴 TIME 2 (Total: ${redTotal} | Média: ${redAvg})\n` +
+        redPlayers.map(p => `   • ${p.name} - Lvl ${p.level}`).join('\n') +
+        `\n\n⚖️ Diferença: ${Math.abs(blueTotal - redTotal)} levels`;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('exportResultBtn');
+        const originalText = btn.textContent;
+        btn.textContent = '✅ Copiado!';
+        btn.classList.add('winner-glow');
+        
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove('winner-glow');
+        }, 2000);
+    }).catch(err => {
+        console.error('Erro ao copiar:', err);
+        alert('Erro ao copiar para área de transferência');
+    });
+}
+
+// Display teams in UI (kept for compatibility)
+function displayTeams(bluePlayers, redPlayers) {
+    displayTeamsAnimated(bluePlayers, redPlayers);
 }
 
 // Reset everything
 function reset() {
-    players = [];
-    updatePlayersList();
-    resultsSection.classList.add('hidden');
-    drawTeamsBtn.disabled = true;
-    drawTeamsBtn.classList.add('pulse');
-    playerNameInput.value = '';
-    playerLevelSelect.selectedIndex = 0;
+    if (confirm('Tem certeza que deseja limpar todos os jogadores?')) {
+        players = [];
+        savePlayers();
+        updatePlayersList();
+        resultsSection.classList.add('hidden');
+        drawTeamsBtn.disabled = true;
+        drawTeamsBtn.classList.add('pulse');
+        playerNameInput.value = '';
+        playerLevelSelect.selectedIndex = 0;
+    }
 }
 
 // Event Listeners
@@ -608,7 +707,15 @@ captain2Input.addEventListener('keypress', (e) => {
 });
 
 // Initialize
+loadPlayers();
+applyTheme(currentTheme);
 updatePlayersList();
-// Habilita o botão de sortear já que temos 10 jogadores de teste
-drawTeamsBtn.disabled = false;
-drawTeamsBtn.classList.remove('pulse');
+
+// Enable draw button if we have 10 or more players
+if (players.length >= 10) {
+    drawTeamsBtn.disabled = false;
+    drawTeamsBtn.classList.remove('pulse');
+} else {
+    drawTeamsBtn.disabled = true;
+    drawTeamsBtn.classList.add('pulse');
+}
