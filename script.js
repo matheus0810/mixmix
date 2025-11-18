@@ -304,11 +304,37 @@ function updatePlayersList() {
         const playerElement = document.createElement('div');
         playerElement.className = 'player-item bg-gray-700/50 p-3 rounded-lg flex justify-between items-center animate-fadeIn';
         playerElement.innerHTML = `
-            <span>${player.name} <span class="text-gray-300 text-sm">(${player.level})</span></span>
-            <button onclick="removePlayer(${index})" class="text-red-400 hover:text-red-300">&times;</button>
+            <span>${player.name} <span class="text-gray-300 text-sm">(Lvl ${player.level})</span></span>
+            <div class="flex gap-2">
+                <button onclick="editPlayer(${index})" class="text-blue-400 hover:text-blue-300 font-bold px-2" title="Editar">✏️</button>
+                <button onclick="removePlayer(${index})" class="text-red-400 hover:text-red-300 font-bold px-2" title="Remover">&times;</button>
+            </div>
         `;
         playersList.appendChild(playerElement);
     });
+}
+
+// Edit player function
+function editPlayer(index) {
+    const player = players[index];
+    
+    // Preenche os campos com os dados atuais
+    playerNameInput.value = player.name;
+    playerLevelSelect.value = player.level;
+    
+    // Remove o jogador da lista temporariamente
+    players.splice(index, 1);
+    updatePlayersList();
+    
+    // Foca no campo de nome
+    playerNameInput.focus();
+    playerNameInput.select();
+    
+    // Atualiza o botão se necessário
+    if (players.length < 10) {
+        drawTeamsBtn.disabled = true;
+        drawTeamsBtn.classList.add('pulse');
+    }
 }
 
 // Remove player function
