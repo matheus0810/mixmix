@@ -226,7 +226,7 @@ function banMap(card, mapName) {
 
     // Add to history
     const historyItem = document.createElement('div');
-    historyItem.className = 'text-sm bg-red-900/30 p-2 rounded';
+    historyItem.className = 'text-sm bg-red-900 p-2 rounded';
     historyItem.innerHTML = `<strong>${currentTeamName}</strong> baniu <strong>${mapName}</strong>`;
     
     if (actionHistoryEl.querySelector('.text-gray-400')) {
@@ -269,7 +269,7 @@ function pickMap(card, mapName) {
 
     // Add to history
     const historyItem = document.createElement('div');
-    historyItem.className = 'text-sm bg-green-900/30 p-2 rounded font-bold';
+    historyItem.className = 'text-sm bg-green-900 p-2 rounded font-bold';
     historyItem.innerHTML = `🎮 Mapa final: <strong>${mapName}</strong>`;
     actionHistoryEl.appendChild(historyItem);
 
@@ -403,7 +403,7 @@ function updatePlayersList() {
         const index = players.indexOf(player);
         const badge = getLevelBadge(player.level);
         const playerElement = document.createElement('div');
-        playerElement.className = 'player-item bg-gray-700/50 p-3 rounded-lg flex justify-between items-center animate-fadeIn hover:bg-gray-600/50 transition-all hover:scale-105';
+        playerElement.className = 'player-item bg-gray-700 p-3 rounded-lg flex justify-between items-center animate-fadeIn hover:bg-gray-600 transition-all';
         playerElement.innerHTML = `
             <span>${badge} ${player.name} <span class="text-gray-300 text-sm font-bold">(Lvl ${player.level})</span></span>
             <div class="flex gap-2">
@@ -427,6 +427,9 @@ function editPlayer(index) {
     players.splice(index, 1);
     savePlayers();
     updatePlayersList();
+    
+    // Habilita o botão de adicionar
+    checkAddButton();
     
     // Foca no campo de nome
     playerNameInput.focus();
@@ -651,7 +654,7 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
             const isBest = player.name === blueBest.name;
             const badge = getLevelBadge(player.level);
             const li = document.createElement('li');
-            li.className = 'bg-blue-800/50 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-blue-700/50 transition-all';
+            li.className = 'bg-blue-800 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-blue-700 transition-all';
             li.innerHTML = `<span>${isBest ? '👑 ' : ''}${badge} ${player.name}</span><span class="font-bold text-blue-300">Lvl ${player.level}</span>`;
             blueTeam.appendChild(li);
         }, index * 100);
@@ -663,7 +666,7 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
             const isBest = player.name === redBest.name;
             const badge = getLevelBadge(player.level);
             const li = document.createElement('li');
-            li.className = 'bg-red-800/50 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-red-700/50 transition-all';
+            li.className = 'bg-red-800 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-red-700 transition-all';
             li.innerHTML = `<span>${isBest ? '👑 ' : ''}${badge} ${player.name}</span><span class="font-bold text-red-300">Lvl ${player.level}</span>`;
             redTeam.appendChild(li);
         }, index * 100);
@@ -674,12 +677,12 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
         const difference = Math.abs(blueTotal - redTotal);
         
         const blueTotalLi = document.createElement('li');
-        blueTotalLi.className = 'bg-blue-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-blue-400 animate-fadeIn';
+        blueTotalLi.className = 'bg-blue-900 p-3 rounded font-bold text-center mt-2 border-2 border-blue-400 animate-fadeIn';
         blueTotalLi.innerHTML = `Total: ${blueTotal} | Média: ${blueAvg}`;
         blueTeam.appendChild(blueTotalLi);
         
         const redTotalLi = document.createElement('li');
-        redTotalLi.className = 'bg-red-900/70 p-3 rounded font-bold text-center mt-2 border-2 border-red-400 animate-fadeIn';
+        redTotalLi.className = 'bg-red-900 p-3 rounded font-bold text-center mt-2 border-2 border-red-400 animate-fadeIn';
         redTotalLi.innerHTML = `Total: ${redTotal} | Média: ${redAvg}`;
         redTeam.appendChild(redTotalLi);
         
