@@ -1,15 +1,15 @@
 // Player data storage
 let players = [
-    { name: "João", level: 18 },
-    { name: "Maria", level: 15 },
-    { name: "Pedro", level: 12 },
-    { name: "Ana", level: 10 },
-    { name: "Carlos", level: 16 },
-    { name: "Juliana", level: 14 },
-    { name: "Lucas", level: 11 },
-    { name: "Fernanda", level: 13 },
-    { name: "Rafael", level: 17 },
-    { name: "Beatriz", level: 9 }
+    { name: "Khaaz", level: 21 },
+    { name: "Lucas", level: 10 },
+    { name: "Pedro", level: 10 },
+    { name: "akira", level: 12 },
+    { name: "matheus", level: 13 },
+    { name: "heb", level: 18 },
+    { name: "adreanu", level: 9 },
+    { name: "vitmoro", level: 12 },
+    { name: "felix", level: 16 },
+    { name: "ntl", level: 16 }
 ];
 
 // Load players from localStorage on startup
