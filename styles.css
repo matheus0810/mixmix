@@ -5,10 +5,6 @@ body {
     transition: background 0.5s ease;
 }
 
-/* Theme Styles */
-body.theme-furia {
-    background: linear-gradient(135deg, #1a0b2e, #7b2cbf, #e91e63, #1a0b2e);
-}
 
 body.theme-furia .header {
     background: rgba(26, 11, 46, 0.8);
@@ -24,7 +20,7 @@ body.theme-furia h3 {
     color: #fbbf24;
 }
 
-body.theme-furia .tab-button.active {
+ .tab-button.active {
     border-bottom-color: #e91e63;
     background: rgba(233, 30, 99, 0.2);
 }
