@@ -31,24 +31,8 @@ function savePlayers() {
     localStorage.setItem('csPlayers', JSON.stringify(players));
 }
 
-// Theme management
-let currentTheme = localStorage.getItem('csTheme') || 'furia';
+// Theme management removed - using default clean theme
 let sortOrder = 'added'; // 'added', 'level', 'name'
-
-function applyTheme(theme) {
-    document.body.className = `theme-${theme}`;
-    currentTheme = theme;
-    localStorage.setItem('csTheme', theme);
-}
-
-// Change theme
-function changeTheme(theme) {
-    applyTheme(theme);
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.classList.remove('active-theme');
-    });
-    document.querySelector(`[data-theme="${theme}"]`)?.classList.add('active-theme');
-}
 
 // Toggle sort order
 function toggleSort() {
@@ -71,9 +55,9 @@ function getLevelBadge(level) {
 
 // Get balance badge
 function getBalanceBadge(difference) {
-    if (difference === 0) return '<span class="px-3 py-1 bg-green-600 rounded-full text-sm font-bold">⚖️ Perfeitamente Balanceado</span>';
-    if (difference <= 2) return '<span class="px-3 py-1 bg-yellow-600 rounded-full text-sm font-bold">✓ Bem Balanceado</span>';
-    return '<span class="px-3 py-1 bg-red-600 rounded-full text-sm font-bold">⚠️ Desbalanceado</span>';
+    if (difference === 0) return '<span class="px-3 py-1 bg-green-100 text-green-800 border border-green-400 rounded-full text-sm font-bold">⚖️ Perfeitamente Balanceado</span>';
+    if (difference <= 2) return '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 border border-yellow-400 rounded-full text-sm font-bold">✓ Bem Balanceado</span>';
+    return '<span class="px-3 py-1 bg-red-100 text-red-800 border border-red-400 rounded-full text-sm font-bold">⚠️ Desbalanceado</span>';
 }
 
 // Update progress bar
@@ -165,7 +149,7 @@ function startPickBan() {
     // Show interface
     pickBanInterface.classList.remove('hidden');
     pickBanResult.classList.add('hidden');
-    actionHistoryEl.innerHTML = '<p class="text-gray-400 italic text-sm">Nenhuma ação ainda</p>';
+    actionHistoryEl.innerHTML = '<p class="text-gray-500 italic text-sm">Nenhuma ação ainda</p>';
     
     // Reset all map cards
     mapCards.forEach(card => {
@@ -226,10 +210,10 @@ function banMap(card, mapName) {
 
     // Add to history
     const historyItem = document.createElement('div');
-    historyItem.className = 'text-sm bg-red-900 p-2 rounded';
+    historyItem.className = 'text-sm bg-red-100 text-red-800 border border-red-300 p-2 rounded';
     historyItem.innerHTML = `<strong>${currentTeamName}</strong> baniu <strong>${mapName}</strong>`;
     
-    if (actionHistoryEl.querySelector('.text-gray-400')) {
+    if (actionHistoryEl.querySelector('.text-gray-500')) {
         actionHistoryEl.innerHTML = '';
     }
     actionHistoryEl.appendChild(historyItem);
@@ -269,7 +253,7 @@ function pickMap(card, mapName) {
 
     // Add to history
     const historyItem = document.createElement('div');
-    historyItem.className = 'text-sm bg-green-900 p-2 rounded font-bold';
+    historyItem.className = 'text-sm bg-green-100 text-green-800 border border-green-300 p-2 rounded font-bold';
     historyItem.innerHTML = `🎮 Mapa final: <strong>${mapName}</strong>`;
     actionHistoryEl.appendChild(historyItem);
 
@@ -386,7 +370,7 @@ function updatePlayersList() {
     updateProgressBar();
     
     if (players.length === 0) {
-        playersList.innerHTML = '<div class="text-gray-400 italic text-center py-4">Nenhum jogador adicionado ainda</div>';
+        playersList.innerHTML = '<div class="text-gray-500 italic text-center py-4">Nenhum jogador adicionado ainda</div>';
         return;
     }
     
@@ -403,12 +387,12 @@ function updatePlayersList() {
         const index = players.indexOf(player);
         const badge = getLevelBadge(player.level);
         const playerElement = document.createElement('div');
-        playerElement.className = 'player-item bg-gray-700 p-3 rounded-lg flex justify-between items-center animate-fadeIn hover:bg-gray-600 transition-all';
+        playerElement.className = 'player-item bg-white border border-gray-300 p-3 rounded-lg flex justify-between items-center animate-fadeIn hover:bg-gray-50 transition-all';
         playerElement.innerHTML = `
-            <span>${badge} ${player.name} <span class="text-gray-300 text-sm font-bold">(Lvl ${player.level})</span></span>
+            <span class="text-gray-800">${badge} ${player.name} <span class="text-gray-600 text-sm font-bold">(Lvl ${player.level})</span></span>
             <div class="flex gap-2">
-                <button onclick="editPlayer(${index})" class="text-blue-400 hover:text-blue-300 font-bold px-2" title="Editar">✏️</button>
-                <button onclick="removePlayer(${index})" class="text-red-400 hover:text-red-300 font-bold px-2" title="Remover">&times;</button>
+                <button onclick="editPlayer(${index})" class="text-blue-600 hover:text-blue-500 font-bold px-2" title="Editar">✏️</button>
+                <button onclick="removePlayer(${index})" class="text-red-600 hover:text-red-500 font-bold px-2" title="Remover">&times;</button>
             </div>
         `;
         playersList.appendChild(playerElement);
@@ -654,8 +638,8 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
             const isBest = player.name === blueBest.name;
             const badge = getLevelBadge(player.level);
             const li = document.createElement('li');
-            li.className = 'bg-blue-800 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-blue-700 transition-all';
-            li.innerHTML = `<span>${isBest ? '👑 ' : ''}${badge} ${player.name}</span><span class="font-bold text-blue-300">Lvl ${player.level}</span>`;
+            li.className = 'bg-blue-100 border border-blue-300 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-blue-200 transition-all';
+            li.innerHTML = `<span class="text-blue-900">${isBest ? '👑 ' : ''}${badge} ${player.name}</span><span class="font-bold text-blue-700">Lvl ${player.level}</span>`;
             blueTeam.appendChild(li);
         }, index * 100);
     });
@@ -666,8 +650,8 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
             const isBest = player.name === redBest.name;
             const badge = getLevelBadge(player.level);
             const li = document.createElement('li');
-            li.className = 'bg-red-800 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-red-700 transition-all';
-            li.innerHTML = `<span>${isBest ? '👑 ' : ''}${badge} ${player.name}</span><span class="font-bold text-red-300">Lvl ${player.level}</span>`;
+            li.className = 'bg-red-100 border border-red-300 p-2 rounded flex justify-between items-center animate-fadeIn hover:bg-red-200 transition-all';
+            li.innerHTML = `<span class="text-red-900">${isBest ? '👑 ' : ''}${badge} ${player.name}</span><span class="font-bold text-red-700">Lvl ${player.level}</span>`;
             redTeam.appendChild(li);
         }, index * 100);
     });
@@ -677,12 +661,12 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
         const difference = Math.abs(blueTotal - redTotal);
         
         const blueTotalLi = document.createElement('li');
-        blueTotalLi.className = 'bg-blue-900 p-3 rounded font-bold text-center mt-2 border-2 border-blue-400 animate-fadeIn';
+        blueTotalLi.className = 'bg-blue-100 p-3 rounded font-bold text-center mt-2 border-2 border-blue-400 animate-fadeIn text-blue-800';
         blueTotalLi.innerHTML = `Total: ${blueTotal} | Média: ${blueAvg}`;
         blueTeam.appendChild(blueTotalLi);
         
         const redTotalLi = document.createElement('li');
-        redTotalLi.className = 'bg-red-900 p-3 rounded font-bold text-center mt-2 border-2 border-red-400 animate-fadeIn';
+        redTotalLi.className = 'bg-red-100 p-3 rounded font-bold text-center mt-2 border-2 border-red-400 animate-fadeIn text-red-800';
         redTotalLi.innerHTML = `Total: ${redTotal} | Média: ${redAvg}`;
         redTeam.appendChild(redTotalLi);
         
@@ -691,7 +675,7 @@ function displayTeamsAnimated(bluePlayers, redPlayers) {
         balanceDiv.className = 'col-span-full text-center mt-4 animate-fadeIn';
         balanceDiv.innerHTML = `
             <div class="mb-2">${getBalanceBadge(difference)}</div>
-            <div class="text-sm text-gray-300">Diferença: ${difference} level${difference !== 1 ? 's' : ''}</div>
+            <div class="text-sm text-gray-600">Diferença: ${difference} level${difference !== 1 ? 's' : ''}</div>
         `;
         
         const resultsGrid = document.querySelector('#resultsSection .grid');
@@ -838,7 +822,6 @@ captain2Input.addEventListener('keypress', (e) => {
 
 // Initialize
 loadPlayers();
-applyTheme(currentTheme);
 updatePlayersList();
 updateProgressBar();
 checkAddButton();
