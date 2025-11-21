@@ -8,53 +8,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="text-white">
+<body class="text-gray-800">
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
         <header class="header rounded-xl mb-8 p-6 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-2">Sorteio de Times</h1>
-            <p class="text-xl text-gray-300">Counter Strike 5v5</p>
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 text-gray-800">Sorteio de Times</h1>
+            <p class="text-xl text-gray-600">Counter Strike 5v5</p>
             <div class="mt-4 flex justify-center">
-                <div class="w-24 h-1 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full"></div>
-            </div>
-            
-            <!-- Theme Selector -->
-            <div class="mt-4 flex justify-center gap-2">
-                <button onclick="changeTheme('furia')" data-theme="furia" class="theme-btn active-theme px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-black to-pink-600 hover:opacity-80 transition-all" title="Tema Furia">⚡</button>
-                <button onclick="changeTheme('mibr')" data-theme="mibr" class="theme-btn px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-500 to-green-600 hover:opacity-80 transition-all" title="Tema MIBR">🇧🇷</button>
+                <div class="w-24 h-1 bg-gray-400 rounded-full"></div>
             </div>
         </header>
 
         <!-- Tabs Navigation -->
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl mb-8 shadow-2xl overflow-hidden">
+        <div class="bg-gray-100 rounded-xl mb-8 shadow-lg overflow-hidden border border-gray-200">
             <div class="grid grid-cols-3 gap-0">
-                <button class="tab-button active py-4 px-6 font-bold text-lg hover:bg-gray-700/30" data-tab="captains">
+                <button class="tab-button active py-4 px-6 font-bold text-lg hover:bg-gray-200" data-tab="captains">
                     🏆 Capitães
                 </button>
-                <button class="tab-button py-4 px-6 font-bold text-lg hover:bg-gray-700/30" data-tab="maps">
+                <button class="tab-button py-4 px-6 font-bold text-lg hover:bg-gray-200" data-tab="maps">
                     🗺️ Mapas
                 </button>
-                <button class="tab-button py-4 px-6 font-bold text-lg hover:bg-gray-700/30" data-tab="teams">
+                <button class="tab-button py-4 px-6 font-bold text-lg hover:bg-gray-200" data-tab="teams">
                     👥 Times
                 </button>
             </div>
         </div>
 
         <!-- Captain Draw Section -->
-        <section id="captainsTab" class="tab-content active bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-2xl">
-            <h2 class="text-2xl font-bold mb-4 text-center">Sorteio de Capitães</h2>
+        <section id="captainsTab" class="tab-content active bg-gray-100 rounded-xl p-6 mb-8 shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Sorteio de Capitães</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div>
                     <label class="block text-lg font-medium mb-2">Capitão 1</label>
                     <input type="text" id="captain1Name" placeholder="Nome do primeiro capitão..." 
-                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                           class="input-field w-full p-3 rounded-lg bg-white text-gray-800 focus:outline-none">
                 </div>
 
                 <div>
                     <label class="block text-lg font-medium mb-2">Capitão 2</label>
                     <input type="text" id="captain2Name" placeholder="Nome do segundo capitão..." 
-                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                           class="input-field w-full p-3 rounded-lg bg-white text-gray-800 focus:outline-none">
                 </div>
                 
                 <div class="flex items-end">
@@ -66,28 +60,28 @@
 
             <!-- Captain Result -->
             <div id="captainResult" class="hidden mt-6">
-                <div class="bg-gradient-to-r from-yellow-900/70 to-yellow-700/50 p-6 rounded-xl border-2 border-yellow-500/50 text-center">
-                    <p class="text-lg mb-2">🏆 Começa escolhendo:</p>
-                    <p id="winnerName" class="text-3xl font-bold text-yellow-300"></p>
+                <div class="bg-gray-50 p-6 rounded-xl border-2 border-gray-300 text-center">
+                    <p class="text-lg mb-2 text-gray-700">🏆 Começa escolhendo:</p>
+                    <p id="winnerName" class="text-3xl font-bold text-gray-900"></p>
                 </div>
             </div>
         </section>
 
         <!-- Map Picks and Bans Section -->
-        <section id="mapsTab" class="tab-content bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-2xl">
-            <h2 class="text-2xl font-bold mb-4 text-center">Picks e Bans de Mapas</h2>
+        <section id="mapsTab" class="tab-content bg-gray-100 rounded-xl p-6 mb-8 shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Picks e Bans de Mapas</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label class="block text-lg font-medium mb-2">Nome do Time 1</label>
                     <input type="text" id="team1Name" placeholder="Time 1..." 
-                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                           class="input-field w-full p-3 rounded-lg bg-white text-gray-800 focus:outline-none">
                 </div>
 
                 <div>
                     <label class="block text-lg font-medium mb-2">Nome do Time 2</label>
                     <input type="text" id="team2Name" placeholder="Time 2..." 
-                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                           class="input-field w-full p-3 rounded-lg bg-white text-gray-800 focus:outline-none">
                 </div>
             </div>
 
@@ -100,56 +94,56 @@
             <!-- Pick/Ban Interface -->
             <div id="pickBanInterface" class="hidden">
                 <!-- Current turn indicator -->
-                <div class="bg-gray-700/50 p-4 rounded-lg mb-6 text-center">
-                    <p class="text-sm text-gray-300 mb-1">Vez de:</p>
-                    <p id="currentTurn" class="text-2xl font-bold"></p>
-                    <p id="currentAction" class="text-lg text-yellow-300 mt-1"></p>
+                <div class="bg-gray-50 p-4 rounded-lg mb-6 text-center border border-gray-200">
+                    <p class="text-sm text-gray-600 mb-1">Vez de:</p>
+                    <p id="currentTurn" class="text-2xl font-bold text-gray-900"></p>
+                    <p id="currentAction" class="text-lg text-gray-700 mt-1"></p>
                 </div>
 
                 <!-- Maps Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Ancient">
+                    <div class="map-card bg-white p-4 rounded-xl text-center border-2 border-gray-300" data-map="Ancient">
                         <div class="text-xl font-bold mb-2">🏛️</div>
-                        <div class="font-semibold">Ancient</div>
-                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                        <div class="font-semibold text-gray-800">Ancient</div>
+                        <div class="map-status text-sm mt-2 text-gray-500"></div>
                     </div>
-                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Dust2">
+                    <div class="map-card bg-white p-4 rounded-xl text-center border-2 border-gray-300" data-map="Dust2">
                         <div class="text-xl font-bold mb-2">🏜️</div>
-                        <div class="font-semibold">Dust2</div>
-                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                        <div class="font-semibold text-gray-800">Dust2</div>
+                        <div class="map-status text-sm mt-2 text-gray-500"></div>
                     </div>
-                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Inferno">
+                    <div class="map-card bg-white p-4 rounded-xl text-center border-2 border-gray-300" data-map="Inferno">
                         <div class="text-xl font-bold mb-2">🔥</div>
-                        <div class="font-semibold">Inferno</div>
-                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                        <div class="font-semibold text-gray-800">Inferno</div>
+                        <div class="map-status text-sm mt-2 text-gray-500"></div>
                     </div>
-                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Mirage">
+                    <div class="map-card bg-white p-4 rounded-xl text-center border-2 border-gray-300" data-map="Mirage">
                         <div class="text-xl font-bold mb-2">🌴</div>
-                        <div class="font-semibold">Mirage</div>
-                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                        <div class="font-semibold text-gray-800">Mirage</div>
+                        <div class="map-status text-sm mt-2 text-gray-500"></div>
                     </div>
-                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Nuke">
+                    <div class="map-card bg-white p-4 rounded-xl text-center border-2 border-gray-300" data-map="Nuke">
                         <div class="text-xl font-bold mb-2">☢️</div>
-                        <div class="font-semibold">Nuke</div>
-                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                        <div class="font-semibold text-gray-800">Nuke</div>
+                        <div class="map-status text-sm mt-2 text-gray-500"></div>
                     </div>
-                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Overpass">
+                    <div class="map-card bg-white p-4 rounded-xl text-center border-2 border-gray-300" data-map="Overpass">
                         <div class="text-xl font-bold mb-2">🌉</div>
-                        <div class="font-semibold">Overpass</div>
-                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                        <div class="font-semibold text-gray-800">Overpass</div>
+                        <div class="map-status text-sm mt-2 text-gray-500"></div>
                     </div>
-                    <div class="map-card bg-gray-700/70 p-4 rounded-xl text-center" data-map="Train">
+                    <div class="map-card bg-white p-4 rounded-xl text-center border-2 border-gray-300" data-map="Train">
                         <div class="text-xl font-bold mb-2">🚂</div>
-                        <div class="font-semibold">Train</div>
-                        <div class="map-status text-sm mt-2 text-gray-400"></div>
+                        <div class="font-semibold text-gray-800">Train</div>
+                        <div class="map-status text-sm mt-2 text-gray-500"></div>
                     </div>
                 </div>
 
                 <!-- Action History -->
-                <div class="bg-gray-700/50 p-4 rounded-lg">
-                    <h3 class="text-lg font-bold mb-3">Histórico</h3>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-bold mb-3 text-gray-800">Histórico</h3>
                     <div id="actionHistory" class="space-y-2 max-h-48 overflow-y-auto">
-                        <p class="text-gray-400 italic text-sm">Nenhuma ação ainda</p>
+                        <p class="text-gray-500 italic text-sm">Nenhuma ação ainda</p>
                     </div>
                 </div>
 
@@ -163,27 +157,27 @@
 
             <!-- Final Result -->
             <div id="pickBanResult" class="hidden mt-6">
-                <h3 class="text-xl font-bold mb-4 text-center text-green-400">🎮 Mapa Escolhido</h3>
-                <div class="bg-gradient-to-r from-green-900/70 to-green-700/50 p-6 rounded-xl border-2 border-green-500/50 text-center">
-                    <p id="finalMap" class="text-4xl font-bold"></p>
+                <h3 class="text-xl font-bold mb-4 text-center text-gray-800">🎮 Mapa Escolhido</h3>
+                <div class="bg-gray-50 p-6 rounded-xl border-2 border-gray-300 text-center">
+                    <p id="finalMap" class="text-4xl font-bold text-gray-900"></p>
                 </div>
             </div>
         </section>
 
         <!-- Input Section -->
-        <section id="teamsTab" class="tab-content bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-2xl">
-            <h2 class="text-2xl font-bold mb-4 text-center">Insira o nome do corno</h2>
+        <section id="teamsTab" class="tab-content bg-gray-100 rounded-xl p-6 mb-8 shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Insira o nome do corno</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div>
                     <label class="block text-lg font-medium mb-2">Nome do newba</label>
                     <input type="text" id="playerName" placeholder="Digite o nome do jogador..." 
-                           class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                           class="input-field w-full p-3 rounded-lg bg-white text-gray-800 focus:outline-none">
                 </div>
 
                 <div>
                     <label class="block text-lg font-medium mb-2">Level Gamersclub</label>
-                    <select id="playerLevel" class="input-field w-full p-3 rounded-lg bg-gray-700/50 text-black focus:outline-none">
+                    <select id="playerLevel" class="input-field w-full p-3 rounded-lg bg-white text-gray-800 focus:outline-none">
                         <option value="">Selecione o level...</option>
                         <option value="21">21</option>
                         <option value="20">20</option>
@@ -239,7 +233,7 @@
                 </div>
                 <div id="playersList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 min-h-[80px]">
                     <!-- Players will be added here dynamically -->
-                    <div class="text-gray-400 italic text-center py-4">Nenhum jogador adicionado ainda</div>
+                    <div class="text-gray-500 italic text-center py-4">Nenhum jogador adicionado ainda</div>
                 </div>
             </div>
 
@@ -250,19 +244,19 @@
             </div>
 
             <!-- Results Section -->
-            <div id="resultsSection" class="hidden mt-8 bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 shadow-2xl">
-            <h2 class="text-2xl font-bold mb-6 text-center">Times Sorteados</h2>
+            <div id="resultsSection" class="hidden mt-8 bg-gray-50 rounded-xl p-6 shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Times Sorteados</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="team-card bg-gradient-to-br from-blue-900/70 to-blue-700/50 p-6 rounded-xl border border-blue-500/30">
-                    <h3 class="text-xl font-bold mb-4 text-center text-blue-300">Time 1</h3>
+                <div class="team-card bg-blue-50 p-6 rounded-xl border-2 border-blue-300">
+                    <h3 class="text-xl font-bold mb-4 text-center text-blue-700">Time 1</h3>
                     <ul id="blueTeam" class="space-y-2">
                         <!-- Blue team players will go here -->
                     </ul>
                 </div>
                 
-                <div class="team-card bg-gradient-to-br from-red-900/70 to-red-700/50 p-6 rounded-xl border border-red-500/30">
-                    <h3 class="text-xl font-bold mb-4 text-center text-red-300">Time 2</h3>
+                <div class="team-card bg-red-50 p-6 rounded-xl border-2 border-red-300">
+                    <h3 class="text-xl font-bold mb-4 text-center text-red-700">Time 2</h3>
                     <ul id="redTeam" class="space-y-2">
                         <!-- Red team players will go here -->
                     </ul>
