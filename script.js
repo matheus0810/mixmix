@@ -1,16 +1,5 @@
 // Player data storage
-let players = [
-    { name: "Khaaz", level: 21 },
-    { name: "Lucas", level: 10 },
-    { name: "Pedro", level: 10 },
-    { name: "akira", level: 12 },
-    { name: "matheus", level: 13 },
-    { name: "heb", level: 18 },
-    { name: "adreanu", level: 9 },
-    { name: "vitmoro", level: 12 },
-    { name: "felix", level: 16 },
-    { name: "ntl", level: 16 }
-];
+let players = [];
 
 // Load players from localStorage on startup
 function loadPlayers() {
